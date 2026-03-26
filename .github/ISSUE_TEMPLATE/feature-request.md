@@ -1,7 +1,7 @@
 ---
 name: Feature Request
 about: Nouvelle fonctionnalite pour un agent Factory
-labels: ["factory:ready", "feature"]
+labels: ['factory:ready', 'feature']
 ---
 
 ## Contexte

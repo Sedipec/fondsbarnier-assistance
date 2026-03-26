@@ -1,7 +1,7 @@
 ---
 name: Maintenance
 about: Mise a jour, refactoring, cleanup
-labels: ["factory:ready", "maintenance"]
+labels: ['factory:ready', 'maintenance']
 ---
 
 ## Type de maintenance
