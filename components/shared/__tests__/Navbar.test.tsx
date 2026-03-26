@@ -16,7 +16,13 @@ describe('Navbar', () => {
     expect(link).toHaveAttribute('href', '/about');
   });
 
-  it('contient un lien vers l\'accueil', () => {
+  it('contient un lien vers la page Nous rejoindre', () => {
+    render(<Navbar />);
+    const link = screen.getByRole('link', { name: /nous rejoindre/i });
+    expect(link).toHaveAttribute('href', '/join-us');
+  });
+
+  it("contient un lien vers l'accueil", () => {
     render(<Navbar />);
     const link = screen.getByRole('link', {
       name: /fondsbarnierassistance/i,
