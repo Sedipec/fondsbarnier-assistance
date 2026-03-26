@@ -1,7 +1,7 @@
 ---
 name: Bug Report
 about: Signaler un bug a corriger par la Factory
-labels: ["factory:ready", "bug"]
+labels: ['factory:ready', 'bug']
 ---
 
 ## Description du bug
