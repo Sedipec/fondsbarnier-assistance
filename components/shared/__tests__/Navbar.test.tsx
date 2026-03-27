@@ -16,6 +16,12 @@ describe('Navbar', () => {
     expect(link).toHaveAttribute('href', '/about');
   });
 
+  it('contient un lien vers la page Contact', () => {
+    render(<Navbar />);
+    const link = screen.getByRole('link', { name: /contact/i });
+    expect(link).toHaveAttribute('href', '/contact');
+  });
+
   it('contient un lien vers l\'accueil', () => {
     render(<Navbar />);
     const link = screen.getByRole('link', {
