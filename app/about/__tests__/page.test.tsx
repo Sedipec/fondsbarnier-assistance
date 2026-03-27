@@ -17,7 +17,7 @@ describe('AboutPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('contient un lien retour vers l\'accueil', () => {
+  it("contient un lien retour vers l'accueil", () => {
     render(<AboutPage />);
     const link = screen.getByRole('link', { name: /retour a l'accueil/i });
     expect(link).toHaveAttribute('href', '/');
