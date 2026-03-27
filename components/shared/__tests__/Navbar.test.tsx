@@ -44,7 +44,7 @@ describe('Navbar', () => {
 
   it('affiche un bouton burger sur mobile', () => {
     render(<Navbar />);
-    const burgerButton = screen.getByRole('button');
+    const burgerButton = screen.getByRole('button', { name: /menu/i });
     expect(burgerButton).toBeInTheDocument();
   });
 });
