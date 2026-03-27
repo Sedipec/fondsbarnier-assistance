@@ -14,22 +14,29 @@ export default function Navbar() {
           FondsBarnierAssistance
         </Link>
       </div>
-      <div className="flex-none">
+      <div className="flex-none gap-2">
         <ul className="menu menu-horizontal px-1">
           <li>
             <Link href="/about">A propos</Link>
           </li>
           {session?.user ? (
             <>
+              {session.user.role === 'admin' && (
+                <>
+                  <li>
+                    <Link href="/admin">Tableau de bord</Link>
+                  </li>
+                  <li>
+                    <Link href="/admin/users">Utilisateurs</Link>
+                  </li>
+                </>
+              )}
               <li>
                 <Link
                   href={session.user.role === 'admin' ? '/admin' : '/dashboard'}
                 >
                   Mon espace
                 </Link>
-              </li>
-              <li>
-                <SignOutButton />
               </li>
             </>
           ) : (
@@ -43,6 +50,14 @@ export default function Navbar() {
             </>
           )}
         </ul>
+        {session?.user && (
+          <>
+            <span className="text-base-content/70 text-sm">
+              {session.user.name}
+            </span>
+            <SignOutButton />
+          </>
+        )}
       </div>
     </nav>
   );
