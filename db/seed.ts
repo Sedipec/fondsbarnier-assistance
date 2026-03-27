@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import bcryptjs from 'bcryptjs';
-import { users } from './schema';
+import { users, sources } from './schema';
 import { eq } from 'drizzle-orm';
 
 async function seed() {
@@ -41,6 +41,29 @@ async function seed() {
   });
 
   console.log(`Admin cree: ${adminEmail}`);
+
+  // Seed des sources MVP
+  const mvpSources = [
+    { slug: 'portail', label: 'Portail client' },
+    { slug: 'formulaire', label: 'Formulaire site vitrine' },
+    { slug: 'appel', label: 'Appel telephonique' },
+  ];
+
+  for (const src of mvpSources) {
+    const existing = await db
+      .select()
+      .from(sources)
+      .where(eq(sources.slug, src.slug))
+      .limit(1);
+
+    if (existing.length === 0) {
+      await db.insert(sources).values(src);
+      console.log(`Source creee: ${src.slug}`);
+    } else {
+      console.log(`Source ${src.slug} existe deja.`);
+    }
+  }
+
   await client.end();
 }
 
