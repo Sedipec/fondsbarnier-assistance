@@ -64,6 +64,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.id = user.id;
       }
 
+      // Fallback: fetch role from DB if missing (ex: first Google OAuth login)
+      if (!token.role && token.id) {
+        const dbUser = await db.query.users.findFirst({
+          where: eq(users.id, token.id as string),
+        });
+        if (dbUser) token.role = dbUser.role;
+      }
+
       // Mettre a jour le token si la session est mise a jour
       if (trigger === 'update' && session) {
         token.role = session.role;

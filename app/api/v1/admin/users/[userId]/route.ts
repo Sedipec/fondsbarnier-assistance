@@ -16,10 +16,25 @@ export async function PATCH(
   }
 
   const { userId } = await params;
-  const body = await request.json();
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'JSON invalide.' }, { status: 400 });
+  }
+
+  // Validate isActive: must be 0 or 1
+  const isActive = Number(body.isActive);
+  if (isActive !== 0 && isActive !== 1) {
+    return NextResponse.json(
+      { error: 'Valeur isActive invalide (0 ou 1 attendu).' },
+      { status: 400 },
+    );
+  }
 
   // Empecher un admin de se desactiver lui-meme
-  if (userId === session.user.id && body.isActive === 0) {
+  if (userId === session.user.id && isActive === 0) {
     return NextResponse.json(
       { error: 'Vous ne pouvez pas desactiver votre propre compte.' },
       { status: 400 },
@@ -29,12 +44,12 @@ export async function PATCH(
   await db
     .update(users)
     .set({
-      isActive: body.isActive,
+      isActive,
       updatedAt: new Date(),
     })
     .where(eq(users.id, userId));
 
-  return NextResponse.json({ data: { id: userId, isActive: body.isActive } });
+  return NextResponse.json({ data: { id: userId, isActive } });
 }
 
 // Supprimer un utilisateur

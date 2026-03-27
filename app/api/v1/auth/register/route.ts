@@ -37,18 +37,22 @@ export async function POST(request: NextRequest) {
 
     let role: 'admin' | 'client' = 'client';
 
-    // Verifier le token d'invitation admin
+    // Verifier le token d'invitation admin (operation atomique pour eviter race condition)
     if (inviteToken) {
-      const invitation = await db.query.adminInvitations.findFirst({
-        where: and(
-          eq(adminInvitations.token, inviteToken),
-          eq(adminInvitations.email, email),
-          gt(adminInvitations.expiresAt, new Date()),
-          isNull(adminInvitations.usedAt),
-        ),
-      });
+      const [claimed] = await db
+        .update(adminInvitations)
+        .set({ usedAt: new Date() })
+        .where(
+          and(
+            eq(adminInvitations.token, inviteToken),
+            eq(adminInvitations.email, email),
+            gt(adminInvitations.expiresAt, new Date()),
+            isNull(adminInvitations.usedAt),
+          ),
+        )
+        .returning({ id: adminInvitations.id });
 
-      if (!invitation) {
+      if (!claimed) {
         return NextResponse.json(
           {
             error: "Lien d'invitation invalide, expire ou deja utilise.",
@@ -58,12 +62,6 @@ export async function POST(request: NextRequest) {
       }
 
       role = 'admin';
-
-      // Marquer l'invitation comme utilisee
-      await db
-        .update(adminInvitations)
-        .set({ usedAt: new Date() })
-        .where(eq(adminInvitations.id, invitation.id));
     }
 
     // Hasher le mot de passe
