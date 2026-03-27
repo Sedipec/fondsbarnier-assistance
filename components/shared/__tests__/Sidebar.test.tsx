@@ -157,11 +157,11 @@ describe('Sidebar', () => {
       ).toBeInTheDocument();
     });
 
-    it("ouvre la sidebar mobile au clic sur le bouton hamburger", async () => {
-      const user = userEvent.setup();
+    it("ouvre la sidebar mobile au clic sur le bouton hamburger", () => {
+      
       render(<Sidebar />);
       const button = screen.getByLabelText('Ouvrir le menu');
-      await user.click(button);
+      fireEvent.click(button);
       expect(screen.getByLabelText('Fermer le menu')).toBeInTheDocument();
     });
   });
