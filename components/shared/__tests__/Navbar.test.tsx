@@ -22,7 +22,7 @@ describe('Navbar', () => {
     expect(link).toHaveAttribute('href', '/contact');
   });
 
-  it('contient un lien vers l\'accueil', () => {
+  it("contient un lien vers l'accueil", () => {
     render(<Navbar />);
     const link = screen.getByRole('link', {
       name: /fondsbarnierassistance/i,

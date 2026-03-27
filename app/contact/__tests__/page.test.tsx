@@ -42,11 +42,7 @@ describe('ContactPage', () => {
 
   it('desactive le formulaire en mode loading', async () => {
     const react = await import('react');
-    vi.mocked(react.useActionState).mockReturnValue([
-      null,
-      vi.fn(),
-      true,
-    ]);
+    vi.mocked(react.useActionState).mockReturnValue([null, vi.fn(), true]);
 
     render(<ContactPage />);
     expect(screen.getByLabelText(/nom/i)).toBeDisabled();
@@ -77,8 +73,6 @@ describe('ContactPage', () => {
     ]);
 
     render(<ContactPage />);
-    expect(screen.getByRole('alert')).toHaveTextContent(
-      'Le nom est requis.',
-    );
+    expect(screen.getByRole('alert')).toHaveTextContent('Le nom est requis.');
   });
 });

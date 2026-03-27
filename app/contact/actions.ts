@@ -27,11 +27,7 @@ export async function submitContactForm(
     return { success: false, error: "L'adresse email n'est pas valide." };
   }
 
-  if (
-    !message ||
-    typeof message !== 'string' ||
-    message.trim().length === 0
-  ) {
+  if (!message || typeof message !== 'string' || message.trim().length === 0) {
     return { success: false, error: 'Le message est requis.' };
   }
 
