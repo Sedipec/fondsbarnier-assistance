@@ -6,6 +6,8 @@ import {
   pgEnum,
   primaryKey,
   integer,
+  uniqueIndex,
+  index,
 } from 'drizzle-orm/pg-core';
 import type { AdapterAccountType } from 'next-auth/adapters';
 
@@ -72,6 +74,63 @@ export const verificationTokens = pgTable(
     primaryKey({
       columns: [verificationToken.identifier, verificationToken.token],
     }),
+  ],
+);
+
+// Table sources (referentiel canaux d'acquisition)
+export const sources = pgTable('sources', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  slug: text('slug').unique().notNull(),
+  label: text('label').notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+});
+
+// Enum pour les statuts de dossier
+export const dossierStatutEnum = pgEnum('dossier_statut', [
+  'nouveau',
+  'en_cours',
+  'en_attente',
+  'accepte',
+  'refuse',
+  'cloture',
+]);
+
+// Table dossiers
+export const dossiers = pgTable(
+  'dossiers',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    nom: text('nom').notNull(),
+    prenom: text('prenom').notNull(),
+    email: text('email').notNull(),
+    telephone: text('telephone').notNull(),
+    commune: text('commune').notNull(),
+    typeDeBien: text('type_de_bien').notNull(),
+    adresseComplete: text('adresse_complete'),
+    numeroCadastre: text('numero_cadastre'),
+    reference: text('reference').unique().notNull(),
+    sourceId: uuid('source_id')
+      .notNull()
+      .references(() => sources.id),
+    gestionnaireId: uuid('gestionnaire_id').references(() => users.id),
+    statut: dossierStatutEnum('statut').default('nouveau').notNull(),
+    etape: integer('etape').default(1).notNull(),
+    etapeUpdatedAt: timestamp('etape_updated_at', { mode: 'date' })
+      .defaultNow()
+      .notNull(),
+    hubspotDealId: text('hubspot_deal_id'),
+    magicLinkToken: text('magic_link_token'),
+    magicLinkExpiresAt: timestamp('magic_link_expires_at', { mode: 'date' }),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('dossiers_email_unique').on(table.email),
+    index('dossiers_dedup_secondary').on(
+      table.telephone,
+      table.nom,
+      table.commune,
+    ),
   ],
 );
 
