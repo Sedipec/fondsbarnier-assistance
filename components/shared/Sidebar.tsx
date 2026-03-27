@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
@@ -53,9 +54,11 @@ function UserAvatar({
 }) {
   if (image) {
     return (
-      <img
+      <Image
         src={image}
         alt={name || 'Avatar'}
+        width={36}
+        height={36}
         className="h-9 w-9 rounded-full object-cover"
         referrerPolicy="no-referrer"
       />
@@ -108,18 +111,18 @@ function NavLink({
       >
         {/* Trait lateral actif */}
         {isActive && (
-          <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-white" />
+          <span className="absolute top-1/2 left-0 h-6 w-1 -translate-y-1/2 rounded-r-full bg-white" />
         )}
         <Icon className="h-5 w-5 shrink-0" />
         <span className="flex-1">{item.label}</span>
         {showBadge && (
-          <span className="badge badge-sm bg-white/20 text-white border-0">
+          <span className="badge badge-sm border-0 bg-white/20 text-white">
             {dossierCount}
           </span>
         )}
       </Link>
       {/* Tooltip */}
-      <div className="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 rounded-md bg-gray-900 px-2.5 py-1.5 text-xs text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 lg:hidden">
+      <div className="pointer-events-none absolute top-1/2 left-full z-50 ml-2 -translate-y-1/2 rounded-md bg-gray-900 px-2.5 py-1.5 text-xs text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 lg:hidden">
         {item.label}
       </div>
     </li>
@@ -155,7 +158,7 @@ export default function Sidebar({ dossierCount }: SidebarProps) {
       {/* Logo */}
       <div className="border-b border-white/10 px-5 py-6">
         <Link href="/" className="block">
-          <h1 className="text-lg font-bold leading-tight text-white">
+          <h1 className="text-lg leading-tight font-bold text-white">
             Fonds Barnier Assistance
           </h1>
           <p className="mt-0.5 text-xs font-medium tracking-wider text-white/50">
@@ -169,7 +172,10 @@ export default function Sidebar({ dossierCount }: SidebarProps) {
       </div>
 
       {/* Navigation principale */}
-      <nav className="flex flex-1 flex-col px-3 py-4" aria-label="Navigation principale">
+      <nav
+        className="flex flex-1 flex-col px-3 py-4"
+        aria-label="Navigation principale"
+      >
         <p className="mb-2 px-3 text-[11px] font-semibold tracking-widest text-white/40">
           {sectionLabel}
         </p>
@@ -231,7 +237,7 @@ export default function Sidebar({ dossierCount }: SidebarProps) {
       {/* Bouton hamburger mobile */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="fixed left-4 top-4 z-50 rounded-lg bg-gray-900 p-2 text-white shadow-lg lg:hidden"
+        className="fixed top-4 left-4 z-50 rounded-lg bg-gray-900 p-2 text-white shadow-lg lg:hidden"
         aria-label={mobileOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
       >
         {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}

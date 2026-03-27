@@ -26,7 +26,7 @@ export default function Breadcrumb() {
 
   return (
     <nav aria-label="Fil d'ariane" className="mb-6">
-      <ol className="flex items-center gap-1.5 text-sm text-base-content/60">
+      <ol className="text-base-content/60 flex items-center gap-1.5 text-sm">
         {segments.map((segment, index) => {
           const href = '/' + segments.slice(0, index + 1).join('/');
           const isLast = index === segments.length - 1;
@@ -40,11 +40,11 @@ export default function Breadcrumb() {
                 </span>
               )}
               {isLast ? (
-                <span className="font-medium text-base-content">{label}</span>
+                <span className="text-base-content font-medium">{label}</span>
               ) : (
                 <Link
                   href={href}
-                  className="transition-colors hover:text-base-content"
+                  className="hover:text-base-content transition-colors"
                 >
                   {label}
                 </Link>
