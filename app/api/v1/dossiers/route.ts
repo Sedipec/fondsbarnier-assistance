@@ -49,18 +49,28 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const result = await createDossier({
-    nom: String(body.nom),
-    prenom: String(body.prenom),
-    email: emailStr,
-    telephone: String(body.telephone),
-    commune: String(body.commune),
-    typeDeBien: String(body.typeDeBien),
-    sourceId: String(body.sourceId),
-    adresseComplete: body.adresseComplete ? String(body.adresseComplete) : null,
-    numeroCadastre: body.numeroCadastre ? String(body.numeroCadastre) : null,
-    gestionnaireId: body.gestionnaireId ? String(body.gestionnaireId) : null,
-  });
+  let result;
+  try {
+    result = await createDossier({
+      nom: String(body.nom),
+      prenom: String(body.prenom),
+      email: emailStr,
+      telephone: String(body.telephone),
+      commune: String(body.commune),
+      typeDeBien: String(body.typeDeBien),
+      sourceId: String(body.sourceId),
+      adresseComplete: body.adresseComplete
+        ? String(body.adresseComplete)
+        : null,
+      numeroCadastre: body.numeroCadastre ? String(body.numeroCadastre) : null,
+      gestionnaireId: body.gestionnaireId ? String(body.gestionnaireId) : null,
+    });
+  } catch {
+    return NextResponse.json(
+      { error: 'Erreur interne lors de la creation du dossier.' },
+      { status: 500 },
+    );
+  }
 
   if (!result.success) {
     return NextResponse.json({ error: result.error }, { status: 409 });
