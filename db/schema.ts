@@ -9,6 +9,7 @@ import {
   uniqueIndex,
   index,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import type { AdapterAccountType } from 'next-auth/adapters';
 
 // Enum pour les roles utilisateur
@@ -125,11 +126,15 @@ export const dossiers = pgTable(
     updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().notNull(),
   },
   (table) => [
-    uniqueIndex('dossiers_email_unique').on(table.email),
-    index('dossiers_dedup_secondary').on(
-      table.telephone,
-      table.nom,
-      table.commune,
+    uniqueIndex('dossiers_email_unique').using(
+      'btree',
+      sql`lower(trim(${table.email}))`,
+    ),
+    index('dossiers_dedup_secondary').using(
+      'btree',
+      sql`lower(trim(${table.telephone}))`,
+      sql`lower(trim(${table.nom}))`,
+      sql`lower(trim(${table.commune}))`,
     ),
   ],
 );
