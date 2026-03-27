@@ -45,7 +45,7 @@ export default function ContactPage() {
           </div>
         )}
 
-        <form ref={formRef} action={formAction} noValidate>
+        <form ref={formRef} action={formAction}>
           <fieldset disabled={isPending} className="space-y-4">
             <div className="form-control">
               <label htmlFor="name" className="label">
