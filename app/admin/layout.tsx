@@ -1,5 +1,7 @@
 import { auth } from '@/utils/serverAuth';
 import { redirect } from 'next/navigation';
+import Sidebar from '@/components/shared/Sidebar';
+import Breadcrumb from '@/components/shared/Breadcrumb';
 
 export default async function AdminLayout({
   children,
@@ -13,8 +15,16 @@ export default async function AdminLayout({
   }
 
   if (session.user.role !== 'admin') {
-    redirect('/dashboard');
+    redirect('/espace/mon-dossier');
   }
 
-  return <>{children}</>;
+  return (
+    <div className="flex min-h-screen">
+      <Sidebar />
+      <main className="flex-1 bg-base-200 p-6 lg:p-8">
+        <Breadcrumb />
+        {children}
+      </main>
+    </div>
+  );
 }
