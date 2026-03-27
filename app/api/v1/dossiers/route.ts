@@ -57,9 +57,7 @@ export async function POST(request: NextRequest) {
     commune: String(body.commune),
     typeDeBien: String(body.typeDeBien),
     sourceId: String(body.sourceId),
-    adresseComplete: body.adresseComplete
-      ? String(body.adresseComplete)
-      : null,
+    adresseComplete: body.adresseComplete ? String(body.adresseComplete) : null,
     numeroCadastre: body.numeroCadastre ? String(body.numeroCadastre) : null,
     gestionnaireId: body.gestionnaireId ? String(body.gestionnaireId) : null,
   });
