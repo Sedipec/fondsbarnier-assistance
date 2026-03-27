@@ -51,6 +51,15 @@ export const authConfig = {
 
       return true;
     },
+    // Le callback session doit etre dans authConfig pour que le middleware
+    // puisse acceder au role de l'utilisateur via auth?.user?.role
+    session({ session, token }) {
+      if (token && session.user) {
+        session.user.id = token.id as string;
+        (session.user as { role?: string }).role = token.role as string;
+      }
+      return session;
+    },
   },
   providers: [],
 } satisfies NextAuthConfig;
