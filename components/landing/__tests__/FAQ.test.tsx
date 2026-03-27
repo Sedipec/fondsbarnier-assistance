@@ -8,10 +8,10 @@ describe('FAQ', () => {
     expect(screen.getByText(/questions frequentes/i)).toBeInTheDocument();
   });
 
-  it('affiche 5 questions', () => {
+  it('affiche 3 questions', () => {
     render(<FAQ />);
     const radios = screen.getAllByRole('radio');
-    expect(radios).toHaveLength(5);
+    expect(radios).toHaveLength(3);
   });
 
   it('la premiere question est ouverte par defaut', () => {

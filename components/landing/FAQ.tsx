@@ -1,28 +1,18 @@
 const questions = [
   {
-    question: 'Qu&apos;est-ce que le Fonds Barnier ?',
+    question: "Qu'est-ce que le Fonds Barnier ?",
     answer:
-      'Le Fonds de Prevention des Risques Naturels Majeurs (Fonds Barnier) finance des mesures de prevention et d&apos;indemnisation pour les victimes de catastrophes naturelles, notamment les inondations.',
+      "Le Fonds de Prevention des Risques Naturels Majeurs (Fonds Barnier) finance des mesures de prevention et d'indemnisation pour les victimes de catastrophes naturelles, notamment les inondations.",
   },
   {
     question: 'Suis-je eligible a une indemnisation ?',
     answer:
-      'Vous etes potentiellement eligible si votre commune a fait l&apos;objet d&apos;un arrete de catastrophe naturelle (Cat Nat) et que vous avez subi des dommages lies a l&apos;inondation.',
+      "Vous etes potentiellement eligible si votre commune a fait l'objet d'un arrete de catastrophe naturelle (Cat Nat) et que vous avez subi des dommages lies a l'inondation.",
   },
   {
     question: 'Quels documents dois-je fournir ?',
     answer:
-      'Les documents principaux sont : une piece d&apos;identite, un justificatif de domicile, des photos des dommages, les devis ou factures de reparation, et votre attestation d&apos;assurance habitation.',
-  },
-  {
-    question: 'Combien de temps prend la procedure ?',
-    answer:
-      'Le delai varie selon la complexite du dossier et la reactivite des organismes. En general, comptez entre 2 et 6 mois apres le depot d&apos;un dossier complet.',
-  },
-  {
-    question: 'Le service est-il gratuit ?',
-    answer:
-      'L&apos;utilisation de la plateforme pour constituer et suivre votre dossier est entierement gratuite. Nous sommes la pour simplifier vos demarches.',
+      "Les documents principaux sont : une piece d'identite, un justificatif de domicile, des photos des dommages, les devis ou factures de reparation, et votre attestation d'assurance habitation.",
   },
 ];
 
