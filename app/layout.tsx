@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SessionProvider } from '@/components/auth/SessionProvider';
 import Navbar from '@/components/shared/Navbar';
 import './globals.css';
 
@@ -16,8 +17,10 @@ export default function RootLayout({
   return (
     <html lang="fr" data-theme="light">
       <body>
-        <Navbar />
-        {children}
+        <SessionProvider>
+          <Navbar />
+          {children}
+        </SessionProvider>
       </body>
     </html>
   );
