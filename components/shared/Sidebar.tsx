@@ -34,7 +34,7 @@ const adminMainNav: NavItem[] = [
 ];
 
 const adminBottomNav: NavItem[] = [
-  { label: 'Parametres', href: '/admin/parametres', icon: Settings },
+  { label: 'Paramètres', href: '/admin/parametres', icon: Settings },
 ];
 
 const clientMainNav: NavItem[] = [
@@ -42,7 +42,7 @@ const clientMainNav: NavItem[] = [
 ];
 
 const clientBottomNav: NavItem[] = [
-  { label: 'Parametres', href: '/espace/parametres', icon: Settings },
+  { label: 'Paramètres', href: '/espace/parametres', icon: Settings },
 ];
 
 function UserAvatar({
@@ -122,7 +122,7 @@ function NavLink({
         )}
       </Link>
       {/* Tooltip */}
-      <div className="pointer-events-none absolute top-1/2 left-full z-50 ml-2 -translate-y-1/2 rounded-md bg-gray-900 px-2.5 py-1.5 text-xs text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 lg:hidden">
+      <div className="pointer-events-none absolute top-1/2 left-full z-50 ml-2 -translate-y-1/2 rounded-md bg-gray-900 px-2.5 py-1.5 text-xs text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">
         {item.label}
       </div>
     </li>
@@ -222,8 +222,8 @@ export default function Sidebar({ dossierCount }: SidebarProps) {
           <button
             onClick={() => signOut({ callbackUrl: '/' })}
             className="rounded-lg p-1.5 text-white/50 transition-colors duration-200 hover:bg-white/10 hover:text-white"
-            aria-label="Se deconnecter"
-            title="Se deconnecter"
+            aria-label="Se déconnecter"
+            title="Se déconnecter"
           >
             <LogOut className="h-4 w-4" />
           </button>

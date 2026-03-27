@@ -8,7 +8,7 @@ export default function AdminDossiersPage() {
       <div className="card bg-base-100 shadow-xl">
         <div className="card-body">
           <p className="text-base-content/70">
-            La liste des dossiers sera affichee ici.
+            La liste des dossiers sera affichée ici.
           </p>
         </div>
       </div>

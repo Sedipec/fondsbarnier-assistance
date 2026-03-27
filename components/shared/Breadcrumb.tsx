@@ -9,7 +9,7 @@ const segmentLabels: Record<string, string> = {
   dashboard: 'Tableau de bord',
   dossiers: 'Dossiers',
   suivi: 'Suivi dossier',
-  parametres: 'Parametres',
+  parametres: 'Paramètres',
   espace: 'Mon espace',
   'mon-dossier': 'Mon dossier',
 };

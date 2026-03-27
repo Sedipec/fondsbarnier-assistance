@@ -6,7 +6,7 @@ export default function AdminSuiviPage() {
       <div className="card bg-base-100 shadow-xl">
         <div className="card-body">
           <p className="text-base-content/70">
-            Le suivi detaille des dossiers sera affiche ici.
+            Le suivi détaillé des dossiers sera affiché ici.
           </p>
         </div>
       </div>

@@ -12,7 +12,7 @@ export default async function AdminDashboardPage() {
           <div className="card-body">
             <h2 className="card-title">Bienvenue</h2>
             <p className="text-base-content/70">
-              Connecte en tant que {session?.user?.name}
+              Connecté en tant que {session?.user?.name}
             </p>
           </div>
         </div>
@@ -30,7 +30,7 @@ export default async function AdminDashboardPage() {
           <div className="card-body">
             <h2 className="card-title">Utilisateurs</h2>
             <p className="text-base-content/70">
-              Gerer les utilisateurs et les invitations
+              Gérer les utilisateurs et les invitations
             </p>
           </div>
         </div>
