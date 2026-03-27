@@ -1,11 +1,18 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { SignOutButton } from '@/components/auth/SignOutButton';
 
 export default function Navbar() {
   const { data: session } = useSession();
+  const pathname = usePathname();
+
+  // Ne pas afficher la navbar sur les pages avec sidebar
+  const hasSidebar =
+    pathname.startsWith('/admin') || pathname.startsWith('/espace');
+  if (hasSidebar) return null;
 
   return (
     <nav className="navbar bg-base-100 shadow-sm">
@@ -20,25 +27,17 @@ export default function Navbar() {
             <Link href="/about">A propos</Link>
           </li>
           {session?.user ? (
-            <>
-              {session.user.role === 'admin' && (
-                <>
-                  <li>
-                    <Link href="/admin">Tableau de bord</Link>
-                  </li>
-                  <li>
-                    <Link href="/admin/users">Utilisateurs</Link>
-                  </li>
-                </>
-              )}
-              <li>
-                <Link
-                  href={session.user.role === 'admin' ? '/admin' : '/dashboard'}
-                >
-                  Mon espace
-                </Link>
-              </li>
-            </>
+            <li>
+              <Link
+                href={
+                  session.user.role === 'admin'
+                    ? '/admin/dashboard'
+                    : '/espace/mon-dossier'
+                }
+              >
+                Mon espace
+              </Link>
+            </li>
           ) : (
             <>
               <li>
