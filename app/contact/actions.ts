@@ -32,11 +32,7 @@ export async function submitContactForm(
   }
 
   // Log du message (pas de DB pour l'instant)
-  console.log('[Contact]', {
-    name: name.trim(),
-    email: email.trim(),
-    message: message.trim(),
-  });
+  console.log('[Contact] Nouveau message recu');
 
   return { success: true };
 }
