@@ -23,8 +23,9 @@ describe('Navbar', () => {
 
   it('contient un lien vers la page A propos', () => {
     render(<Navbar />);
-    const link = screen.getByRole('link', { name: /a propos/i });
-    expect(link).toHaveAttribute('href', '/about');
+    const links = screen.getAllByRole('link', { name: /a propos/i });
+    expect(links.length).toBeGreaterThanOrEqual(1);
+    expect(links[0]).toHaveAttribute('href', '/about');
   });
 
   it("contient un lien vers l'accueil", () => {
@@ -37,7 +38,13 @@ describe('Navbar', () => {
 
   it('affiche les liens de connexion et inscription si non connecte', () => {
     render(<Navbar />);
-    expect(screen.getByText('Connexion')).toBeInTheDocument();
-    expect(screen.getByText('Inscription')).toBeInTheDocument();
+    expect(screen.getAllByText('Connexion').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Inscription').length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('affiche un bouton burger sur mobile', () => {
+    render(<Navbar />);
+    const burgerButton = screen.getByRole('button');
+    expect(burgerButton).toBeInTheDocument();
   });
 });
