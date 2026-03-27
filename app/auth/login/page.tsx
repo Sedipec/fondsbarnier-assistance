@@ -44,7 +44,7 @@ export default function LoginPage() {
       <div className="card-body">
         <h2 className="card-title justify-center text-2xl">Connexion</h2>
         <p className="text-base-content/60 text-center text-sm">
-          Connectez-vous a votre compte
+          Connectez-vous à votre compte
         </p>
 
         {error && (
