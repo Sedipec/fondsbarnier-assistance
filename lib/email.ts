@@ -1,6 +1,8 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 function escapeHtml(str: string): string {
   return str
@@ -16,7 +18,7 @@ export async function sendAdminInvitationEmail(
   invitedByName: string,
 ) {
   const safeName = escapeHtml(invitedByName);
-  await resend.emails.send({
+  await getResend().emails.send({
     from: process.env.RESEND_FROM_EMAIL || 'noreply@fondsbarnier.fr',
     to: email,
     subject: 'Invitation administrateur - FondsBarnierAssistance',
