@@ -85,11 +85,8 @@ export async function POST(request: NextRequest) {
       error instanceof Error ? error.message : 'Unknown error',
     );
 
-    // Contrainte d'unicite violee (email deja utilise, race condition)
-    if (
-      error instanceof Error &&
-      error.message?.includes('unique')
-    ) {
+    // Contrainte d'unicité violée (email déjà utilisé, race condition)
+    if ((error as { code?: string }).code === '23505') {
       return NextResponse.json(
         { error: 'Un compte avec cet email existe deja.' },
         { status: 409 },
