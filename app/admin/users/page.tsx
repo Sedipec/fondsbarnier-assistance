@@ -116,7 +116,11 @@ export default function AdminUsersPage() {
 
         {/* Vue mobile : cards */}
         <div className="space-y-3 md:hidden">
-          {users.map((user) => (
+          {users.length === 0 ? (
+            <p className="text-base-content/50 p-6 text-center">
+              Aucun utilisateur trouvé.
+            </p>
+          ) : users.map((user) => (
             <div key={user.id} className="card bg-base-100 shadow-md">
               <div className="card-body p-4">
                 <div className="flex items-center justify-between">
