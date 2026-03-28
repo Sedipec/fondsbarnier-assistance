@@ -365,22 +365,6 @@ describe('getDossierById', () => {
       { id: 'hist-1', dossierId: 'dossier-uuid-1', type: 'creation', content: 'Dossier cree', authorId: null, createdAt: new Date() },
     ];
 
-    // Premier select : dossier trouve
-    mockSelectLimit.mockResolvedValueOnce([fakeDossier]);
-    // Deuxieme select : documents (pas de .limit, utilise .where directement — mockSelectWhere)
-    mockSelectWhere.mockReturnValueOnce({
-      limit: mockSelectLimit,
-      orderBy: mockSelectOrderBy,
-    });
-    // Le where pour documents retourne directement les documents
-    const mockDocumentsResult = Promise.resolve(fakeDocuments);
-    // Troisieme select : historique avec orderBy
-    mockSelectOrderBy.mockResolvedValueOnce(fakeHistory);
-
-    // Reimplementer : documents = await db.select().from().where()
-    // La chaine documents n'appelle pas .limit, elle s'arrete a .where()
-    // Donc mockSelectWhere doit retourner une promise pour ce cas
-    // On reconfigure les mocks pour cette sequence
     vi.clearAllMocks();
 
     // Select 1 : dossier

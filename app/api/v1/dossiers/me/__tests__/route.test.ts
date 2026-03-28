@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { NextRequest } from 'next/server';
 
 // Mocks
 const mockAuth = vi.fn();
@@ -15,12 +14,6 @@ vi.mock('@/lib/dossier', () => ({
 
 // Import apres les mocks
 import { GET } from '../route';
-
-function makeGetRequest(): NextRequest {
-  return new NextRequest('http://localhost/api/v1/dossiers/me', {
-    method: 'GET',
-  });
-}
 
 const fakeDossier = {
   id: 'dossier-1',
@@ -41,7 +34,7 @@ describe('GET /api/v1/dossiers/me', () => {
   it('retourne 401 si pas de session', async () => {
     mockAuth.mockResolvedValueOnce(null);
 
-    const response = await GET(makeGetRequest());
+    const response = await GET();
     const json = await response.json();
 
     expect(response.status).toBe(401);
@@ -53,7 +46,7 @@ describe('GET /api/v1/dossiers/me', () => {
       user: { role: 'client' },
     });
 
-    const response = await GET(makeGetRequest());
+    const response = await GET();
     const json = await response.json();
 
     expect(response.status).toBe(401);
@@ -65,7 +58,7 @@ describe('GET /api/v1/dossiers/me', () => {
       user: null,
     });
 
-    const response = await GET(makeGetRequest());
+    const response = await GET();
     const json = await response.json();
 
     expect(response.status).toBe(401);
@@ -78,7 +71,7 @@ describe('GET /api/v1/dossiers/me', () => {
     });
     mockGetDossierByUserId.mockResolvedValueOnce(null);
 
-    const response = await GET(makeGetRequest());
+    const response = await GET();
     const json = await response.json();
 
     expect(response.status).toBe(404);
@@ -91,7 +84,7 @@ describe('GET /api/v1/dossiers/me', () => {
     });
     mockGetDossierByUserId.mockResolvedValueOnce(fakeDossier);
 
-    const response = await GET(makeGetRequest());
+    const response = await GET();
     const json = await response.json();
 
     expect(response.status).toBe(200);
@@ -105,7 +98,7 @@ describe('GET /api/v1/dossiers/me', () => {
     });
     mockGetDossierByUserId.mockResolvedValueOnce(fakeDossier);
 
-    const response = await GET(makeGetRequest());
+    const response = await GET();
     const json = await response.json();
 
     expect(response.status).toBe(200);
