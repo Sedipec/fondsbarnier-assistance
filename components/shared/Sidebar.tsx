@@ -237,7 +237,7 @@ export default function Sidebar({ dossierCount }: SidebarProps) {
       {/* Bouton hamburger mobile */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="fixed top-4 left-4 z-50 rounded-lg bg-gray-900 p-2 text-white shadow-lg lg:hidden"
+        className="fixed top-4 left-4 z-[70] rounded-lg bg-gray-900 p-2 text-white shadow-lg lg:hidden"
         aria-label={mobileOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
       >
         {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -246,7 +246,7 @@ export default function Sidebar({ dossierCount }: SidebarProps) {
       {/* Overlay mobile */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-[60] bg-black/50 lg:hidden"
           onClick={() => setMobileOpen(false)}
           aria-hidden="true"
         />
@@ -259,7 +259,7 @@ export default function Sidebar({ dossierCount }: SidebarProps) {
 
       {/* Sidebar mobile */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[260px] flex-col bg-gray-900 transition-transform duration-300 lg:hidden ${
+        className={`fixed inset-y-0 left-0 z-[60] flex w-[260px] flex-col bg-gray-900 transition-transform duration-300 lg:hidden ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
