@@ -424,52 +424,54 @@ async function seed() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { sourceSlug, ...dossierValues } = dossierData;
 
-    const [inserted] = await db
-      .insert(dossiers)
-      .values({
-        ...dossierValues,
-        sourceId,
-        updatedAt: dossierValues.createdAt,
-        etapeUpdatedAt: dossierValues.createdAt,
-      })
-      .returning({ id: dossiers.id });
+    await db.transaction(async (tx) => {
+      const [inserted] = await tx
+        .insert(dossiers)
+        .values({
+          ...dossierValues,
+          sourceId,
+          updatedAt: dossierValues.createdAt,
+          etapeUpdatedAt: dossierValues.createdAt,
+        })
+        .returning({ id: dossiers.id });
 
-    // Ajouter des documents (les premiers N selon l'etape)
-    const etape = dossierData.etape ?? 1;
-    const docCount = Math.min(etape, documentTemplates.length);
-    for (let i = 0; i < docCount; i++) {
-      const template = documentTemplates[i];
-      const received = i < etape - 1;
-      await db.insert(dossierDocuments).values({
+      // Ajouter des documents (les premiers N selon l'etape)
+      const etape = dossierData.etape ?? 1;
+      const docCount = Math.min(etape, documentTemplates.length);
+      for (let i = 0; i < docCount; i++) {
+        const template = documentTemplates[i];
+        const received = i < etape - 1;
+        await tx.insert(dossierDocuments).values({
+          dossierId: inserted.id,
+          type: template.type,
+          label: template.label,
+          received,
+          receivedAt: received ? dossierValues.createdAt : null,
+        });
+      }
+
+      // Ajouter une entree historique de creation
+      await tx.insert(dossierHistory).values({
         dossierId: inserted.id,
-        type: template.type,
-        label: template.label,
-        received,
-        receivedAt: received ? dossierValues.createdAt : null,
-      });
-    }
-
-    // Ajouter une entree historique de creation
-    await db.insert(dossierHistory).values({
-      dossierId: inserted.id,
-      type: 'creation',
-      content: `Dossier ${dossierData.reference} cree`,
-      authorId: adminId,
-      createdAt: dossierValues.createdAt,
-    });
-
-    // Ajouter des transitions d'etape si etape > 1
-    for (let step = 1; step < etape; step++) {
-      const stepDate = new Date(dossierValues.createdAt!);
-      stepDate.setDate(stepDate.getDate() + step * 7);
-      await db.insert(dossierHistory).values({
-        dossierId: inserted.id,
-        type: 'etape_change',
-        content: `Etape ${step} → ${step + 1}`,
+        type: 'creation',
+        content: `Dossier ${dossierData.reference} cree`,
         authorId: adminId,
-        createdAt: stepDate,
+        createdAt: dossierValues.createdAt,
       });
-    }
+
+      // Ajouter des transitions d'etape si etape > 1
+      for (let step = 1; step < etape; step++) {
+        const stepDate = new Date(dossierValues.createdAt!);
+        stepDate.setDate(stepDate.getDate() + step * 7);
+        await tx.insert(dossierHistory).values({
+          dossierId: inserted.id,
+          type: 'etape_change',
+          content: `Etape ${step} → ${step + 1}`,
+          authorId: adminId,
+          createdAt: stepDate,
+        });
+      }
+    });
 
     console.log(`Dossier cree: ${dossierData.reference}`);
   }
