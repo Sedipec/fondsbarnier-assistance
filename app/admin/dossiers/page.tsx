@@ -128,30 +128,33 @@ export default function AdminDossiersPage() {
     }
   }
 
-  // Charger les sources depuis l'API a l'ouverture du modal
-  const fetchSources = useCallback(async () => {
+  // Charger les sources depuis l'API à l'ouverture du modal
+  const fetchSources = useCallback(async (signal?: AbortSignal) => {
     setSourcesLoading(true);
     setSourcesError('');
     try {
-      const res = await fetch('/api/v1/sources');
+      const res = await fetch('/api/v1/sources', { signal });
       const data = await res.json();
       if (!res.ok) {
         setSourcesError(data.error || 'Erreur lors du chargement des sources.');
         return;
       }
       if (data.data) setSources(data.data);
-    } catch {
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
       setSourcesError(
         'Impossible de charger les sources. Vérifiez votre connexion.',
       );
     } finally {
-      setSourcesLoading(false);
+      if (!signal?.aborted) setSourcesLoading(false);
     }
   }, []);
 
   useEffect(() => {
     if (showCreateModal && sources.length === 0) {
-      fetchSources();
+      const controller = new AbortController();
+      fetchSources(controller.signal);
+      return () => controller.abort();
     }
   }, [showCreateModal, sources.length, fetchSources]);
 
