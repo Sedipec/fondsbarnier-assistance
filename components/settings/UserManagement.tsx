@@ -14,14 +14,20 @@ interface User {
 export default function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const fetchUsers = useCallback(async () => {
     try {
       const res = await fetch('/api/v1/admin/users');
       const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Erreur lors du chargement des utilisateurs.');
+        return;
+      }
       setUsers(data.data || []);
+      setError('');
     } catch {
-      // Silencieux
+      setError('Erreur lors du chargement des utilisateurs.');
     } finally {
       setLoading(false);
     }
@@ -33,14 +39,20 @@ export default function UserManagement() {
 
   async function handleToggleActive(userId: string, currentStatus: number) {
     try {
-      await fetch(`/api/v1/admin/users/${userId}`, {
+      const res = await fetch(`/api/v1/admin/users/${userId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isActive: currentStatus ? 0 : 1 }),
       });
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || 'Erreur lors de la modification du statut.');
+        return;
+      }
+      setError('');
       fetchUsers();
     } catch {
-      // Silencieux
+      setError('Erreur lors de la modification du statut.');
     }
   }
 
@@ -51,11 +63,15 @@ export default function UserManagement() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: newRole }),
       });
-      if (res.ok) {
-        fetchUsers();
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || 'Erreur lors de la modification du rôle.');
+        return;
       }
+      setError('');
+      fetchUsers();
     } catch {
-      // Silencieux
+      setError('Erreur lors de la modification du rôle.');
     }
   }
 
@@ -69,6 +85,12 @@ export default function UserManagement() {
 
   return (
     <div className="space-y-4">
+      {error && (
+        <div className="alert alert-error">
+          <span>{error}</span>
+        </div>
+      )}
+
       <p className="text-base-content/60 text-sm">
         {users.length} utilisateur{users.length > 1 ? 's' : ''} enregistre
         {users.length > 1 ? 's' : ''}

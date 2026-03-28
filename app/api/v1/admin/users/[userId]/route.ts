@@ -73,9 +73,28 @@ export async function PATCH(
     updateData.role = body.role;
   }
 
-  await db.update(users).set(updateData).where(eq(users.id, userId));
+  // Pas de champ à mettre à jour
+  if (updateData.isActive === undefined && updateData.role === undefined) {
+    return NextResponse.json(
+      { error: 'Aucun champ à modifier (isActive ou role attendu).' },
+      { status: 400 },
+    );
+  }
 
-  return NextResponse.json({ data: { id: userId, ...updateData } });
+  const [updated] = await db
+    .update(users)
+    .set(updateData)
+    .where(eq(users.id, userId))
+    .returning({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      role: users.role,
+      isActive: users.isActive,
+      updatedAt: users.updatedAt,
+    });
+
+  return NextResponse.json({ data: updated });
 }
 
 // Supprimer un utilisateur
