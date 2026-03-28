@@ -72,7 +72,7 @@ export default function AdminDossiersPage() {
   function handleFiltersChange(newFilters: DossierFiltersState) {
     const searchChanged = newFilters.search !== displaySearch;
 
-    // Toujours mettre a jour l'affichage du champ de recherche immediatement
+    // Toujours mettre à jour l'affichage du champ de recherche immédiatement
     setDisplaySearch(newFilters.search);
 
     if (searchChanged) {
@@ -82,7 +82,7 @@ export default function AdminDossiersPage() {
         setFilters({ ...newFilters });
         setPage(1);
       }, 300);
-      // Appliquer les autres filtres immediatement si necessaire
+      // Appliquer les autres filtres immédiatement si nécessaire
       if (
         newFilters.etape !== filters.etape ||
         newFilters.statut !== filters.statut
@@ -95,7 +95,7 @@ export default function AdminDossiersPage() {
         setPage(1);
       }
     } else {
-      // Pas de changement de recherche : appliquer immediatement
+      // Pas de changement de recherche : appliquer immédiatement
       if (debounceRef.current) clearTimeout(debounceRef.current);
       setFilters(newFilters);
       setPage(1);
@@ -134,21 +134,25 @@ export default function AdminDossiersPage() {
     setSourcesError('');
     try {
       const res = await fetch('/api/v1/sources', { signal });
+      // Vérifier si la requête a été annulée pendant le fetch
+      if (signal?.aborted) return;
       if (!res.ok) {
         let errorMsg = 'Erreur lors du chargement des sources.';
         try {
           const errBody = await res.json();
           if (errBody.error) errorMsg = errBody.error;
         } catch {
-          // Reponse non-JSON, on garde le message par defaut
+          // Réponse non-JSON, on garde le message par défaut
         }
         setSourcesError(errorMsg);
         return;
       }
       const data = await res.json();
+      if (signal?.aborted) return;
       if (data.data) setSources(data.data);
-    } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') return;
+    } catch {
+      // Ignorer les erreurs des requêtes annulées
+      if (signal?.aborted) return;
       setSourcesError(
         'Impossible de charger les sources. Vérifiez votre connexion.',
       );
@@ -158,12 +162,12 @@ export default function AdminDossiersPage() {
   }, []);
 
   useEffect(() => {
-    if (showCreateModal && sources.length === 0) {
-      const controller = new AbortController();
-      fetchSources(controller.signal);
-      return () => controller.abort();
-    }
-  }, [showCreateModal, sources.length, fetchSources]);
+    if (!showCreateModal) return;
+    // Toujours refetcher à l'ouverture du modal pour éviter les données stale
+    const controller = new AbortController();
+    fetchSources(controller.signal);
+    return () => controller.abort();
+  }, [showCreateModal, fetchSources]);
 
   return (
     <div className="mx-auto max-w-6xl">

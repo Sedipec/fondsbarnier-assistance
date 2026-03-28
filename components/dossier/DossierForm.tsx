@@ -191,6 +191,19 @@ export default function DossierForm({
                 </button>
               )}
             </div>
+          ) : sources.length === 0 ? (
+            <div className="flex flex-col gap-2">
+              <p className="text-warning text-sm">Aucune source disponible.</p>
+              {onRetrySources && (
+                <button
+                  type="button"
+                  className="btn btn-outline btn-warning btn-sm w-fit"
+                  onClick={onRetrySources}
+                >
+                  Réessayer
+                </button>
+              )}
+            </div>
           ) : (
             <select
               id="dossier-source"
