@@ -9,26 +9,45 @@ import { users, accounts, sessions, verificationTokens } from '@/db/schema';
 import { authConfig } from './auth.config';
 
 // Validation runtime des variables d'environnement auth
-function validateAuthEnv() {
+export function validateAuthEnv() {
   const required: Record<string, string | undefined> = {
     AUTH_SECRET: process.env.AUTH_SECRET,
+  };
+
+  const optional: Record<string, string | undefined> = {
     AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
     AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
   };
 
-  const missing = Object.entries(required)
+  const missingRequired = Object.entries(required)
     .filter(([, value]) => !value)
     .map(([key]) => key);
 
-  if (missing.length > 0) {
+  const missingOptional = Object.entries(optional)
+    .filter(([, value]) => !value)
+    .map(([key]) => key);
+
+  if (missingRequired.length > 0) {
     console.error(
-      `[auth] Variables d'environnement manquantes : ${missing.join(', ')}. ` +
-        `L'authentification ne fonctionnera pas correctement.`,
+      `[auth] Variables d'environnement requises manquantes : ${missingRequired.join(', ')}. ` +
+        `L'authentification ne fonctionnera pas.`,
     );
   }
+
+  if (missingOptional.length > 0) {
+    console.warn(
+      `[auth] Variables d'environnement OAuth manquantes : ${missingOptional.join(', ')}. ` +
+        `La connexion Google sera désactivée.`,
+    );
+  }
+
+  return { missingRequired, missingOptional };
 }
 
-validateAuthEnv();
+const { missingOptional } = validateAuthEnv();
+const isGoogleConfigured =
+  !missingOptional.includes('AUTH_GOOGLE_ID') &&
+  !missingOptional.includes('AUTH_GOOGLE_SECRET');
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -42,10 +61,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: 'jwt',
   },
   providers: [
-    Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
-    }),
+    ...(isGoogleConfigured
+      ? [
+          Google({
+            clientId: process.env.AUTH_GOOGLE_ID!,
+            clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+          }),
+        ]
+      : []),
     Credentials({
       name: 'credentials',
       credentials: {
