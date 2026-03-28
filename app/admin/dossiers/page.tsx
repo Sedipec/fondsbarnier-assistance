@@ -142,7 +142,7 @@ export default function AdminDossiersPage() {
       if (data.data) setSources(data.data);
     } catch {
       setSourcesError(
-        'Impossible de charger les sources. Verifiez votre connexion.',
+        'Impossible de charger les sources. Vérifiez votre connexion.',
       );
     } finally {
       setSourcesLoading(false);

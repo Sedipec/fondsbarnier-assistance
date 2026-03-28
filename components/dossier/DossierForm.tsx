@@ -43,7 +43,7 @@ export default function DossierForm({
     sourceId: dossier?.sourceId ?? sources[0]?.id ?? '',
   });
 
-  // Synchroniser sourceId quand les sources sont chargees apres le montage
+  // Synchroniser sourceId quand les sources sont chargées après le montage
   useEffect(() => {
     if (!dossier && sources.length > 0 && !form.sourceId) {
       setForm((prev) => ({ ...prev, sourceId: sources[0].id }));
@@ -187,7 +187,7 @@ export default function DossierForm({
                   className="btn btn-outline btn-error btn-sm w-fit"
                   onClick={onRetrySources}
                 >
-                  Reessayer
+                  Réessayer
                 </button>
               )}
             </div>
