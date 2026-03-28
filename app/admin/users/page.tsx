@@ -114,7 +114,52 @@ export default function AdminUsersPage() {
           </button>
         </div>
 
-        <div className="bg-base-100 overflow-x-auto rounded-lg shadow-xl">
+        {/* Vue mobile : cards */}
+        <div className="space-y-3 md:hidden">
+          {users.map((user) => (
+            <div key={user.id} className="card bg-base-100 shadow-md">
+              <div className="card-body p-4">
+                <div className="flex items-center justify-between">
+                  <p className="font-medium">{user.name || '-'}</p>
+                  <div className="flex gap-1">
+                    <span
+                      className={`badge badge-sm ${user.role === 'admin' ? 'badge-primary' : 'badge-ghost'}`}
+                    >
+                      {user.role}
+                    </span>
+                    <span
+                      className={`badge badge-sm ${user.isActive ? 'badge-success' : 'badge-error'}`}
+                    >
+                      {user.isActive ? 'Actif' : 'Desactive'}
+                    </span>
+                  </div>
+                </div>
+                <p className="text-sm text-base-content/60">{user.email}</p>
+                <p className="text-xs text-base-content/40">
+                  Inscrit le{' '}
+                  {new Date(user.createdAt).toLocaleDateString('fr-FR')}
+                </p>
+                <div className="mt-2 flex gap-2">
+                  <button
+                    className={`btn btn-xs flex-1 ${user.isActive ? 'btn-warning' : 'btn-success'}`}
+                    onClick={() => handleToggleActive(user.id, user.isActive)}
+                  >
+                    {user.isActive ? 'Desactiver' : 'Activer'}
+                  </button>
+                  <button
+                    className="btn btn-error btn-xs flex-1"
+                    onClick={() => handleDelete(user.id)}
+                  >
+                    Supprimer
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Vue desktop : table */}
+        <div className="bg-base-100 hidden overflow-x-auto rounded-lg shadow-xl md:block">
           <table className="table">
             <thead>
               <tr>
