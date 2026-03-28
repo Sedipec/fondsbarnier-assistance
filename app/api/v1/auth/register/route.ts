@@ -80,7 +80,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: newUser }, { status: 201 });
   } catch (error) {
-    console.error('[register] Erreur lors de l\'inscription :', error);
+    console.error(
+      '[register] Erreur lors de l\'inscription :',
+      error instanceof Error ? error.message : 'Unknown error',
+    );
 
     // Contrainte d'unicite violee (email deja utilise, race condition)
     if (
