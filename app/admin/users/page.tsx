@@ -102,12 +102,12 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="bg-base-200 min-h-screen p-8">
+    <div className="bg-base-200 min-h-screen p-4 md:p-8">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Utilisateurs</h1>
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-2xl font-bold md:text-3xl">Utilisateurs</h1>
           <button
-            className="btn btn-primary"
+            className="btn btn-primary btn-sm md:btn-md"
             onClick={() => setShowInviteModal(true)}
           >
             Inviter un admin

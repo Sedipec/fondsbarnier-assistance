@@ -21,7 +21,7 @@ export default async function EspaceLayout({
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="bg-base-200 flex-1 p-6 lg:p-8">
+      <main className="bg-base-200 flex-1 p-4 pt-16 md:p-6 lg:p-8 lg:pt-8">
         <Breadcrumb />
         {children}
       </main>

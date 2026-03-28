@@ -142,13 +142,13 @@ export default function AdminDossiersPage() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold">Dossiers</h1>
+          <h1 className="text-2xl font-bold md:text-3xl">Dossiers</h1>
           <span className="badge badge-neutral">{totalCount}</span>
         </div>
         <button
-          className="btn btn-primary"
+          className="btn btn-primary btn-sm md:btn-md"
           onClick={() => setShowCreateModal(true)}
         >
           + Nouveau dossier

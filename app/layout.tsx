@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   title: 'FondsBarnierAssistance - Assistance sinistres inondation',
   description:
     'Constituez et suivez votre dossier Fonds Barnier (Cat Nat) pour votre sinistre inondation.',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+  },
 };
 
 export default function RootLayout({
