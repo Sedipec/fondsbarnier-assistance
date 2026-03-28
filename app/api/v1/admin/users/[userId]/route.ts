@@ -4,7 +4,7 @@ import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
-// Desactiver / activer un utilisateur
+// Modifier un utilisateur (activation/desactivation + role)
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ userId: string }> },
@@ -24,32 +24,57 @@ export async function PATCH(
     return NextResponse.json({ error: 'JSON invalide.' }, { status: 400 });
   }
 
-  // Validate isActive: must be 0 or 1
-  const isActive = Number(body.isActive);
-  if (isActive !== 0 && isActive !== 1) {
-    return NextResponse.json(
-      { error: 'Valeur isActive invalide (0 ou 1 attendu).' },
-      { status: 400 },
-    );
+  const updateData: { isActive?: number; role?: 'admin' | 'client'; updatedAt: Date } = {
+    updatedAt: new Date(),
+  };
+
+  // Gestion isActive
+  if (body.isActive !== undefined) {
+    const isActive = Number(body.isActive);
+    if (isActive !== 0 && isActive !== 1) {
+      return NextResponse.json(
+        { error: 'Valeur isActive invalide (0 ou 1 attendu).' },
+        { status: 400 },
+      );
+    }
+
+    // Empecher un admin de se desactiver lui-meme
+    if (userId === session.user.id && isActive === 0) {
+      return NextResponse.json(
+        { error: 'Vous ne pouvez pas desactiver votre propre compte.' },
+        { status: 400 },
+      );
+    }
+
+    updateData.isActive = isActive;
   }
 
-  // Empecher un admin de se desactiver lui-meme
-  if (userId === session.user.id && isActive === 0) {
-    return NextResponse.json(
-      { error: 'Vous ne pouvez pas desactiver votre propre compte.' },
-      { status: 400 },
-    );
+  // Gestion du role
+  if (body.role !== undefined) {
+    if (body.role !== 'admin' && body.role !== 'client') {
+      return NextResponse.json(
+        { error: 'Role invalide (admin ou client attendu).' },
+        { status: 400 },
+      );
+    }
+
+    // Empecher un admin de changer son propre role
+    if (userId === session.user.id) {
+      return NextResponse.json(
+        { error: 'Vous ne pouvez pas modifier votre propre role.' },
+        { status: 400 },
+      );
+    }
+
+    updateData.role = body.role;
   }
 
   await db
     .update(users)
-    .set({
-      isActive,
-      updatedAt: new Date(),
-    })
+    .set(updateData)
     .where(eq(users.id, userId));
 
-  return NextResponse.json({ data: { id: userId, isActive } });
+  return NextResponse.json({ data: { id: userId, ...updateData } });
 }
 
 // Supprimer un utilisateur
