@@ -34,6 +34,7 @@ export default function AdminDossiersPage() {
     etape: '',
     statut: '',
   });
+  const [displaySearch, setDisplaySearch] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [sources, setSources] = useState<Source[]>([]);
   const [createLoading, setCreateLoading] = useState(false);
@@ -67,14 +68,36 @@ export default function AdminDossiersPage() {
   }, [fetchDossiers]);
 
   function handleFiltersChange(newFilters: DossierFiltersState) {
-    setFilters(newFilters);
-    setPage(1);
+    const searchChanged = newFilters.search !== displaySearch;
 
-    // Debounce la recherche texte
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      // Le useEffect sur filters se charge du fetch
-    }, 300);
+    // Toujours mettre a jour l'affichage du champ de recherche immediatement
+    setDisplaySearch(newFilters.search);
+
+    if (searchChanged) {
+      // Debounce le champ de recherche
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        setFilters({ ...newFilters });
+        setPage(1);
+      }, 300);
+      // Appliquer les autres filtres immediatement si necessaire
+      if (
+        newFilters.etape !== filters.etape ||
+        newFilters.statut !== filters.statut
+      ) {
+        setFilters((prev) => ({
+          ...prev,
+          etape: newFilters.etape,
+          statut: newFilters.statut,
+        }));
+        setPage(1);
+      }
+    } else {
+      // Pas de changement de recherche : appliquer immediatement
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      setFilters(newFilters);
+      setPage(1);
+    }
   }
 
   async function handleCreateDossier(formData: Record<string, string>) {
@@ -133,7 +156,10 @@ export default function AdminDossiersPage() {
       </div>
 
       <div className="mb-4">
-        <DossierFilters filters={filters} onChange={handleFiltersChange} />
+        <DossierFilters
+          filters={{ ...filters, search: displaySearch }}
+          onChange={handleFiltersChange}
+        />
       </div>
 
       <div className="card bg-base-100 shadow-xl">
