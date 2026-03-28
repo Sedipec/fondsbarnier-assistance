@@ -183,7 +183,7 @@ export default function AdminDossiersPage() {
       {/* Modal nouveau dossier */}
       {showCreateModal && (
         <div className="modal modal-open">
-          <div className="modal-box max-w-2xl">
+          <div className="modal-box max-h-[85vh] max-w-2xl overflow-y-auto [&]:[-webkit-overflow-scrolling:touch]">
             <h3 className="text-lg font-bold">Nouveau dossier</h3>
 
             {createError && (
