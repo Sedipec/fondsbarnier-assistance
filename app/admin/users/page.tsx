@@ -130,7 +130,7 @@ export default function AdminUsersPage() {
                     <span
                       className={`badge badge-sm ${user.isActive ? 'badge-success' : 'badge-error'}`}
                     >
-                      {user.isActive ? 'Actif' : 'Desactive'}
+                      {user.isActive ? 'Actif' : 'Désactivé'}
                     </span>
                   </div>
                 </div>
@@ -144,7 +144,7 @@ export default function AdminUsersPage() {
                     className={`btn btn-xs flex-1 ${user.isActive ? 'btn-warning' : 'btn-success'}`}
                     onClick={() => handleToggleActive(user.id, user.isActive)}
                   >
-                    {user.isActive ? 'Desactiver' : 'Activer'}
+                    {user.isActive ? 'Désactiver' : 'Activer'}
                   </button>
                   <button
                     className="btn btn-error btn-xs flex-1"
@@ -190,7 +190,7 @@ export default function AdminUsersPage() {
                     <span
                       className={`badge ${user.isActive ? 'badge-success' : 'badge-error'}`}
                     >
-                      {user.isActive ? 'Actif' : 'Desactive'}
+                      {user.isActive ? 'Actif' : 'Désactivé'}
                     </span>
                   </td>
                   <td className="flex gap-2">
@@ -198,7 +198,7 @@ export default function AdminUsersPage() {
                       className={`btn btn-sm ${user.isActive ? 'btn-warning' : 'btn-success'}`}
                       onClick={() => handleToggleActive(user.id, user.isActive)}
                     >
-                      {user.isActive ? 'Desactiver' : 'Activer'}
+                      {user.isActive ? 'Désactiver' : 'Activer'}
                     </button>
                     <button
                       className="btn btn-error btn-sm"

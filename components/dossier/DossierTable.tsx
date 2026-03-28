@@ -67,7 +67,7 @@ export default function DossierTable({
       <div className="md:hidden">
         {dossiers.length === 0 ? (
           <p className="text-base-content/50 p-6 text-center">
-            Aucun dossier trouve.
+            Aucun dossier trouvé.
           </p>
         ) : (
           dossiers.map((d) => (
@@ -97,7 +97,7 @@ export default function DossierTable({
               {dossiers.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="text-base-content/50 text-center">
-                    Aucun dossier trouve.
+                    Aucun dossier trouvé.
                   </td>
                 </tr>
               ) : (
@@ -132,7 +132,7 @@ export default function DossierTable({
               disabled={page <= 1}
               onClick={() => onPageChange(page - 1)}
             >
-              Precedent
+              Précédent
             </button>
             <button className="join-item btn btn-sm btn-disabled">
               Page {page} / {totalPages}
