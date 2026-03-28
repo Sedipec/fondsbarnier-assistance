@@ -6,25 +6,25 @@ import { Suspense } from 'react';
 
 const errorMessages: Record<string, string> = {
   Configuration:
-    'Un probleme de configuration du serveur empeche la connexion. Veuillez contacter le support.',
+    'Un problème de configuration du serveur empêche la connexion. Veuillez contacter le support.',
   AccessDenied:
-    'Vous n\'avez pas l\'autorisation d\'acceder a cette ressource.',
+    'Vous n\'avez pas l\'autorisation d\'accéder à cette ressource.',
   Verification:
-    'Le lien de verification a expire ou a deja ete utilise.',
+    'Le lien de vérification a expiré ou a déjà été utilisé.',
   OAuthSignin:
-    'Impossible d\'initier la connexion avec le fournisseur OAuth. Veuillez reessayer.',
+    'Impossible d\'initier la connexion avec le fournisseur OAuth. Veuillez réessayer.',
   OAuthCallback:
-    'Une erreur est survenue lors du retour du fournisseur OAuth. Veuillez reessayer.',
+    'Une erreur est survenue lors du retour du fournisseur OAuth. Veuillez réessayer.',
   OAuthCreateAccount:
-    'Impossible de creer un compte avec ce fournisseur OAuth. L\'email est peut-etre deja utilise.',
+    'Impossible de créer un compte avec ce fournisseur OAuth. L\'email est peut-être déjà utilisé.',
   OAuthAccountNotLinked:
-    'Cet email est deja associe a un autre mode de connexion. Utilisez votre methode de connexion habituelle.',
+    'Cet email est déjà associé à un autre mode de connexion. Utilisez votre méthode de connexion habituelle.',
   CredentialsSignin:
-    'Email ou mot de passe incorrect. Veuillez verifier vos identifiants.',
+    'Email ou mot de passe incorrect. Veuillez vérifier vos identifiants.',
   SessionRequired:
-    'Vous devez etre connecte pour acceder a cette page.',
+    'Vous devez être connecté pour accéder à cette page.',
   Default:
-    'Une erreur inattendue est survenue. Veuillez reessayer.',
+    'Une erreur inattendue est survenue. Veuillez réessayer.',
 };
 
 function AuthErrorContent() {
@@ -43,10 +43,10 @@ function AuthErrorContent() {
 
         <div className="card-actions mt-6 w-full flex-col gap-2">
           <Link href="/auth/login" className="btn btn-primary w-full">
-            Retour a la connexion
+            Retour à la connexion
           </Link>
           <Link href="/" className="btn btn-ghost w-full">
-            Retour a l&apos;accueil
+            Retour à l&apos;accueil
           </Link>
         </div>
       </div>
