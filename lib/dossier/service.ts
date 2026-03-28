@@ -338,29 +338,31 @@ export async function advanceEtape(
     throw new Error("Etape invalide (doit etre entre 1 et 10).");
   }
 
-  const [dossier] = await db
-    .select({ etape: dossiers.etape, reference: dossiers.reference })
-    .from(dossiers)
-    .where(eq(dossiers.id, id))
-    .limit(1);
+  return db.transaction(async (tx) => {
+    const [dossier] = await tx
+      .select({ etape: dossiers.etape, reference: dossiers.reference })
+      .from(dossiers)
+      .where(eq(dossiers.id, id))
+      .limit(1);
 
-  if (!dossier) return null;
+    if (!dossier) return null;
 
-  const now = new Date();
-  const [updated] = await db
-    .update(dossiers)
-    .set({ etape: newEtape, etapeUpdatedAt: now, updatedAt: now })
-    .where(eq(dossiers.id, id))
-    .returning();
+    const now = new Date();
+    const [updated] = await tx
+      .update(dossiers)
+      .set({ etape: newEtape, etapeUpdatedAt: now, updatedAt: now })
+      .where(eq(dossiers.id, id))
+      .returning();
 
-  await db.insert(dossierHistory).values({
-    dossierId: id,
-    type: 'etape_change',
-    content: `Etape ${dossier.etape} → ${newEtape}`,
-    authorId,
+    await tx.insert(dossierHistory).values({
+      dossierId: id,
+      type: 'etape_change',
+      content: `Etape ${dossier.etape} → ${newEtape}`,
+      authorId,
+    });
+
+    return updated;
   });
-
-  return updated;
 }
 
 /**
@@ -403,6 +405,15 @@ export async function addNote(
   content: string,
   authorId: string,
 ) {
+  // Verifier que le dossier existe avant l'insertion
+  const [dossier] = await db
+    .select({ id: dossiers.id })
+    .from(dossiers)
+    .where(eq(dossiers.id, dossierId))
+    .limit(1);
+
+  if (!dossier) return null;
+
   const [entry] = await db
     .insert(dossierHistory)
     .values({

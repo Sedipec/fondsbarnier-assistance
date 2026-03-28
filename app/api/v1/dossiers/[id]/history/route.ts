@@ -8,7 +8,7 @@ export async function POST(
 ) {
   const session = await auth();
 
-  if (!session?.user || session.user.role !== 'admin') {
+  if (!session?.user?.id || session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Acces refuse.' }, { status: 403 });
   }
 
@@ -31,7 +31,14 @@ export async function POST(
     );
   }
 
-  const entry = await addNote(id, body.content.trim(), session.user.id!);
+  const entry = await addNote(id, body.content.trim(), session.user.id);
+
+  if (!entry) {
+    return NextResponse.json(
+      { error: 'Dossier introuvable.' },
+      { status: 404 },
+    );
+  }
 
   return NextResponse.json({ data: entry }, { status: 201 });
 }
