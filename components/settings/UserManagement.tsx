@@ -154,9 +154,7 @@ export default function UserManagement() {
                     {user.isActive ? 'Actif' : 'Desactive'}
                   </span>
                 </td>
-                <td>
-                  {new Date(user.createdAt).toLocaleDateString('fr-FR')}
-                </td>
+                <td>{new Date(user.createdAt).toLocaleDateString('fr-FR')}</td>
                 <td>
                   <button
                     className={`btn btn-sm ${user.isActive ? 'btn-warning' : 'btn-success'}`}

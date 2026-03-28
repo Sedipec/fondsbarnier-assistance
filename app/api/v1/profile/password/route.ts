@@ -8,9 +8,7 @@ import { users } from '@/db/schema';
 
 const changePasswordSchema = z
   .object({
-    currentPassword: z
-      .string()
-      .min(1, 'Le mot de passe actuel est requis.'),
+    currentPassword: z.string().min(1, 'Le mot de passe actuel est requis.'),
     newPassword: z
       .string()
       .min(8, 'Le nouveau mot de passe doit contenir au moins 8 caracteres.'),
@@ -37,7 +35,7 @@ export async function PATCH(request: NextRequest) {
 
   const result = changePasswordSchema.safeParse(body);
   if (!result.success) {
-    const message = result.error.errors.map((e) => e.message).join(' ');
+    const message = result.error.issues.map((e) => e.message).join(' ');
     return NextResponse.json({ error: message }, { status: 400 });
   }
 

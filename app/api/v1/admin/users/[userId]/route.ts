@@ -24,7 +24,11 @@ export async function PATCH(
     return NextResponse.json({ error: 'JSON invalide.' }, { status: 400 });
   }
 
-  const updateData: { isActive?: number; role?: 'admin' | 'client'; updatedAt: Date } = {
+  const updateData: {
+    isActive?: number;
+    role?: 'admin' | 'client';
+    updatedAt: Date;
+  } = {
     updatedAt: new Date(),
   };
 
@@ -69,10 +73,7 @@ export async function PATCH(
     updateData.role = body.role;
   }
 
-  await db
-    .update(users)
-    .set(updateData)
-    .where(eq(users.id, userId));
+  await db.update(users).set(updateData).where(eq(users.id, userId));
 
   return NextResponse.json({ data: { id: userId, ...updateData } });
 }

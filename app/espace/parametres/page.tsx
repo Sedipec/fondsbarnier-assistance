@@ -56,9 +56,7 @@ export default function EspaceParametresPage() {
           )}
           {activeTab === 'notifications' && (
             <>
-              <h2 className="card-title mb-4">
-                Preferences de notifications
-              </h2>
+              <h2 className="card-title mb-4">Preferences de notifications</h2>
               <NotificationForm />
             </>
           )}

@@ -23,9 +23,7 @@ const updateProfileSchema = z.object({
 
 const changePasswordSchema = z
   .object({
-    currentPassword: z
-      .string()
-      .min(1, 'Le mot de passe actuel est requis.'),
+    currentPassword: z.string().min(1, 'Le mot de passe actuel est requis.'),
     newPassword: z
       .string()
       .min(8, 'Le nouveau mot de passe doit contenir au moins 8 caracteres.'),
@@ -134,9 +132,7 @@ describe('Profil - Validation changement mot de passe', () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const messages = result.error.issues.map((e) => e.message);
-      expect(messages).toContain(
-        'Les mots de passe ne correspondent pas.',
-      );
+      expect(messages).toContain('Les mots de passe ne correspondent pas.');
     }
   });
 
