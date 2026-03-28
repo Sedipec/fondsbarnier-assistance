@@ -12,9 +12,19 @@ const segmentLabels: Record<string, string> = {
   parametres: 'Paramètres',
   espace: 'Mon espace',
   'mon-dossier': 'Mon dossier',
+  nouveau: 'Nouveau dossier',
+  users: 'Utilisateurs',
 };
 
-function getLabel(segment: string): string {
+// UUID pattern pour detecter les segments dynamiques
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function getLabel(segment: string, prevSegment?: string): string {
+  if (UUID_PATTERN.test(segment)) {
+    if (prevSegment === 'dossiers') return 'Fiche dossier';
+    return 'Detail';
+  }
   return segmentLabels[segment] || decodeURIComponent(segment);
 }
 
@@ -30,7 +40,7 @@ export default function Breadcrumb() {
         {segments.map((segment, index) => {
           const href = '/' + segments.slice(0, index + 1).join('/');
           const isLast = index === segments.length - 1;
-          const label = getLabel(segment);
+          const label = getLabel(segment, segments[index - 1]);
 
           return (
             <li key={href} className="flex items-center gap-1.5">
