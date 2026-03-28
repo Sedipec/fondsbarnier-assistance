@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { SessionProvider } from '@/components/auth/SessionProvider';
 import Navbar from '@/components/shared/Navbar';
 import './globals.css';
@@ -7,11 +7,12 @@ export const metadata: Metadata = {
   title: 'FondsBarnierAssistance - Assistance sinistres inondation',
   description:
     'Constituez et suivez votre dossier Fonds Barnier (Cat Nat) pour votre sinistre inondation.',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-  },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({
