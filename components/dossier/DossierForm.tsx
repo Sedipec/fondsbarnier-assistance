@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface DossierFormProps {
   dossier?: {
@@ -15,6 +15,9 @@ interface DossierFormProps {
     sourceId?: string;
   };
   sources: { id: string; slug: string; label: string }[];
+  sourcesLoading?: boolean;
+  sourcesError?: string;
+  onRetrySources?: () => void;
   onSubmit: (data: Record<string, string>) => void;
   loading?: boolean;
 }
@@ -22,6 +25,9 @@ interface DossierFormProps {
 export default function DossierForm({
   dossier,
   sources,
+  sourcesLoading = false,
+  sourcesError = '',
+  onRetrySources,
   onSubmit,
   loading = false,
 }: DossierFormProps) {
@@ -36,6 +42,13 @@ export default function DossierForm({
     cadastre: dossier?.cadastre ?? '',
     sourceId: dossier?.sourceId ?? sources[0]?.id ?? '',
   });
+
+  // Synchroniser sourceId quand les sources sont chargées après le montage
+  useEffect(() => {
+    if (!dossier && sources.length > 0 && !form.sourceId) {
+      setForm((prev) => ({ ...prev, sourceId: sources[0].id }));
+    }
+  }, [sources, dossier, form.sourceId]);
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -156,30 +169,49 @@ export default function DossierForm({
       {!dossier && (
         <div className="form-control">
           <label className="label" htmlFor="dossier-source">
-            <span className="label-text">Source</span>
+            <span className="label-text">Source *</span>
           </label>
-          <select
-            id="dossier-source"
-            name="sourceId"
-            className="select select-bordered w-full"
-            value={form.sourceId}
-            onChange={handleChange}
-          >
-            {sources.map((src) => (
-              <option key={src.id} value={src.id}>
-                {src.label}
-              </option>
-            ))}
-          </select>
+          {sourcesLoading ? (
+            <div className="flex items-center gap-2 py-2">
+              <span className="loading loading-spinner loading-sm" />
+              <span className="text-base-content/60 text-sm">
+                Chargement des sources...
+              </span>
+            </div>
+          ) : sourcesError ? (
+            <div className="flex flex-col gap-2">
+              <p className="text-error text-sm">{sourcesError}</p>
+              {onRetrySources && (
+                <button
+                  type="button"
+                  className="btn btn-outline btn-error btn-sm w-fit"
+                  onClick={onRetrySources}
+                >
+                  Réessayer
+                </button>
+              )}
+            </div>
+          ) : (
+            <select
+              id="dossier-source"
+              name="sourceId"
+              className="select select-bordered w-full"
+              value={form.sourceId}
+              onChange={handleChange}
+              required
+            >
+              {sources.map((src) => (
+                <option key={src.id} value={src.id}>
+                  {src.label}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
       )}
 
       <div className="modal-action">
-        <button
-          type="submit"
-          className="btn btn-primary"
-          disabled={loading}
-        >
+        <button type="submit" className="btn btn-primary" disabled={loading}>
           {loading ? (
             <span className="loading loading-spinner loading-sm" />
           ) : dossier ? (

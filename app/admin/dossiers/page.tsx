@@ -37,6 +37,8 @@ export default function AdminDossiersPage() {
   const [displaySearch, setDisplaySearch] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [sources, setSources] = useState<Source[]>([]);
+  const [sourcesLoading, setSourcesLoading] = useState(false);
+  const [sourcesError, setSourcesError] = useState('');
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -126,19 +128,35 @@ export default function AdminDossiersPage() {
     }
   }
 
-  // Charger les sources depuis l'API a l'ouverture du modal
+  // Charger les sources depuis l'API à l'ouverture du modal
+  const fetchSources = useCallback(async (signal?: AbortSignal) => {
+    setSourcesLoading(true);
+    setSourcesError('');
+    try {
+      const res = await fetch('/api/v1/sources', { signal });
+      const data = await res.json();
+      if (!res.ok) {
+        setSourcesError(data.error || 'Erreur lors du chargement des sources.');
+        return;
+      }
+      if (data.data) setSources(data.data);
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
+      setSourcesError(
+        'Impossible de charger les sources. Vérifiez votre connexion.',
+      );
+    } finally {
+      if (!signal?.aborted) setSourcesLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (showCreateModal && sources.length === 0) {
-      fetch('/api/v1/sources')
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.data) setSources(data.data);
-        })
-        .catch(() => {
-          // Silencieux — le formulaire affichera une liste vide
-        });
+      const controller = new AbortController();
+      fetchSources(controller.signal);
+      return () => controller.abort();
     }
-  }, [showCreateModal, sources.length]);
+  }, [showCreateModal, sources.length, fetchSources]);
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -183,7 +201,7 @@ export default function AdminDossiersPage() {
       {/* Modal nouveau dossier */}
       {showCreateModal && (
         <div className="modal modal-open">
-          <div className="modal-box max-w-2xl">
+          <div className="modal-box max-h-[85vh] max-w-2xl overflow-y-auto [&]:[-webkit-overflow-scrolling:touch]">
             <h3 className="text-lg font-bold">Nouveau dossier</h3>
 
             {createError && (
@@ -194,6 +212,9 @@ export default function AdminDossiersPage() {
 
             <DossierForm
               sources={sources}
+              sourcesLoading={sourcesLoading}
+              sourcesError={sourcesError}
+              onRetrySources={fetchSources}
               onSubmit={handleCreateDossier}
               loading={createLoading}
             />
