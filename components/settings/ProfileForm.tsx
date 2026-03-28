@@ -30,6 +30,8 @@ export default function ProfileForm() {
             email: data.data.email || '',
             phone: data.data.phone || '',
           });
+        } else {
+          setError(data.error || 'Impossible de charger le profil.');
         }
       } catch {
         setError('Impossible de charger le profil.');
