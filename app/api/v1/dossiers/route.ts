@@ -32,8 +32,13 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const session = await auth();
 
-  if (!session?.user) {
+  if (!session?.user?.id) {
     return NextResponse.json({ error: 'Non autorise.' }, { status: 401 });
+  }
+
+  // Seuls les admins peuvent creer des dossiers
+  if (session.user.role !== 'admin') {
+    return NextResponse.json({ error: 'Acces refuse.' }, { status: 403 });
   }
 
   let body: Record<string, unknown>;
@@ -66,13 +71,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Client : on associe automatiquement son userId
-  const userId =
-    session.user.role === 'admin'
-      ? body.userId
-        ? String(body.userId)
-        : null
-      : session.user.id;
+  const userId = body.userId ? String(body.userId) : null;
 
   let result;
   try {

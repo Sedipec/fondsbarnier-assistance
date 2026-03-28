@@ -168,21 +168,17 @@ describe('POST /api/v1/dossiers', () => {
     expect(json.data).toEqual(fakeDossier);
   });
 
-  it('associe automatiquement le userId pour un client', async () => {
+  it('retourne 403 si le role est client', async () => {
     mockAuth.mockResolvedValueOnce({
       user: { id: 'client-uuid-1', role: 'client' },
     });
 
-    mockCreateDossier.mockResolvedValueOnce({
-      success: true,
-      dossier: { id: 'dossier-uuid-1', reference: 'FB-2026-0001' },
-    });
+    const response = await POST(makeRequest(validBody));
+    const json = await response.json();
 
-    await POST(makeRequest(validBody));
-
-    expect(mockCreateDossier).toHaveBeenCalledWith(
-      expect.objectContaining({ userId: 'client-uuid-1' }),
-    );
+    expect(response.status).toBe(403);
+    expect(json.error).toBe('Acces refuse.');
+    expect(mockCreateDossier).not.toHaveBeenCalled();
   });
 
   it('retourne 409 si doublon email', async () => {
