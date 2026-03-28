@@ -5,7 +5,9 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <h1 className="mb-8 text-3xl font-bold">Tableau de bord</h1>
+      <h1 className="mb-6 text-2xl font-bold md:mb-8 md:text-3xl">
+        Tableau de bord
+      </h1>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         <div className="card bg-base-100 shadow-xl">
