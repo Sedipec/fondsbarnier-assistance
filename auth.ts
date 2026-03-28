@@ -8,6 +8,28 @@ import { db } from '@/db';
 import { users, accounts, sessions, verificationTokens } from '@/db/schema';
 import { authConfig } from './auth.config';
 
+// Validation runtime des variables d'environnement auth
+function validateAuthEnv() {
+  const required: Record<string, string | undefined> = {
+    AUTH_SECRET: process.env.AUTH_SECRET,
+    AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
+    AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
+  };
+
+  const missing = Object.entries(required)
+    .filter(([, value]) => !value)
+    .map(([key]) => key);
+
+  if (missing.length > 0) {
+    console.error(
+      `[auth] Variables d'environnement manquantes : ${missing.join(', ')}. ` +
+        `L'authentification ne fonctionnera pas correctement.`,
+    );
+  }
+}
+
+validateAuthEnv();
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: DrizzleAdapter(db, {
