@@ -150,7 +150,7 @@ const seedDossiers: DossierInsert[] = [
     createdAt: new Date('2025-09-28'),
   },
   {
-    reference: 'FBA-2025-0010',
+    reference: 'FBA-2026-0010',
     nom: 'Simon',
     prenom: 'Nathalie',
     email: 'nathalie.simon@example.fr',
@@ -180,7 +180,7 @@ const seedDossiers: DossierInsert[] = [
     createdAt: new Date('2026-01-20'),
   },
   {
-    reference: 'FBA-2026-0012',
+    reference: 'FBA-2025-0012',
     nom: 'Lefebvre',
     prenom: 'Christine',
     email: 'christine.lefebvre@example.fr',
@@ -209,7 +209,7 @@ const seedDossiers: DossierInsert[] = [
     createdAt: new Date('2026-02-05'),
   },
   {
-    reference: 'FBA-2026-0014',
+    reference: 'FBA-2025-0014',
     nom: 'Roux',
     prenom: 'Valerie',
     email: 'valerie.roux@example.fr',
@@ -267,7 +267,7 @@ const seedDossiers: DossierInsert[] = [
     createdAt: new Date('2026-03-01'),
   },
   {
-    reference: 'FBA-2026-0018',
+    reference: 'FBA-2025-0018',
     nom: 'Fournier',
     prenom: 'Pascale',
     email: 'pascale.fournier@example.fr',
@@ -281,7 +281,7 @@ const seedDossiers: DossierInsert[] = [
     createdAt: new Date('2025-12-20'),
   },
   {
-    reference: 'FBA-2026-0019',
+    reference: 'FBA-2025-0019',
     nom: 'Girard',
     prenom: 'Thierry',
     email: 'thierry.girard@example.fr',
@@ -296,7 +296,7 @@ const seedDossiers: DossierInsert[] = [
     createdAt: new Date('2025-07-05'),
   },
   {
-    reference: 'FBA-2026-0020',
+    reference: 'FBA-2025-0020',
     nom: 'Bonnet',
     prenom: 'Helene',
     email: 'helene.bonnet@example.fr',
