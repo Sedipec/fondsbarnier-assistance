@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     if (password.length < 8) {
       return NextResponse.json(
-        { error: 'Le mot de passe doit contenir au moins 8 caracteres.' },
+        { error: 'Le mot de passe doit contenir au moins 8 caractères.' },
         { status: 400 },
       );
     }
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: 'Un compte avec cet email existe deja.' },
+        { error: 'Un compte avec cet email existe déjà.' },
         { status: 409 },
       );
     }
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       if (!claimed) {
         return NextResponse.json(
           {
-            error: "Lien d'invitation invalide, expire ou deja utilise.",
+            error: "Lien d'invitation invalide, expiré ou déjà utilisé.",
           },
           { status: 400 },
         );
@@ -79,7 +79,36 @@ export async function POST(request: NextRequest) {
       .returning({ id: users.id, email: users.email, role: users.role });
 
     return NextResponse.json({ data: newUser }, { status: 201 });
-  } catch {
+  } catch (error) {
+    console.error(
+      '[register] Erreur lors de l\'inscription :',
+      error instanceof Error ? error.message : 'Unknown error',
+    );
+
+    // Contrainte d'unicité violée (email déjà utilisé, race condition)
+    if ((error as { code?: string }).code === '23505') {
+      return NextResponse.json(
+        { error: 'Un compte avec cet email existe déjà.' },
+        { status: 409 },
+      );
+    }
+
+    // Erreur de connexion à la base de données
+    if (
+      error instanceof Error &&
+      (error.message?.includes('connect') ||
+        error.message?.includes('ECONNREFUSED') ||
+        error.message?.includes('timeout'))
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            'Le service est temporairement indisponible. Veuillez réessayer dans quelques instants.',
+        },
+        { status: 503 },
+      );
+    }
+
     return NextResponse.json(
       { error: "Une erreur est survenue lors de l'inscription." },
       { status: 500 },
