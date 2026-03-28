@@ -103,16 +103,17 @@ export default function AdminDossiersPage() {
     }
   }
 
-  // Charger les sources a l'ouverture du modal
+  // Charger les sources depuis l'API a l'ouverture du modal
   useEffect(() => {
     if (showCreateModal && sources.length === 0) {
-      // Les sources ne sont pas exposees par une API dediee,
-      // on les code en dur (meme valeurs que le seed)
-      setSources([
-        { id: '', slug: 'portail', label: 'Portail client' },
-        { id: '', slug: 'formulaire', label: 'Formulaire site vitrine' },
-        { id: '', slug: 'appel', label: 'Appel telephonique' },
-      ]);
+      fetch('/api/v1/sources')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.data) setSources(data.data);
+        })
+        .catch(() => {
+          // Silencieux — le formulaire affichera une liste vide
+        });
     }
   }, [showCreateModal, sources.length]);
 
