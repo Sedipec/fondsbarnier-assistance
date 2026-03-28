@@ -3,13 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import {
-  LayoutGrid,
-  FolderOpen,
-  Search,
-  Settings,
-  User,
-} from 'lucide-react';
+import { LayoutGrid, FolderOpen, Search, Settings, User } from 'lucide-react';
 
 interface NavItem {
   label: string;
@@ -46,7 +40,7 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="bg-base-100 fixed inset-x-0 bottom-0 z-50 border-t border-base-300 lg:hidden"
+      className="bg-base-100 border-base-300 fixed inset-x-0 bottom-0 z-50 border-t lg:hidden"
       aria-label="Navigation mobile"
     >
       <div className="flex items-center justify-around">

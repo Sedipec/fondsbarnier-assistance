@@ -67,7 +67,9 @@ export default function MonDossierPage() {
   if (notFound || !dossier) {
     return (
       <div className="mx-auto max-w-4xl">
-        <h1 className="mb-6 text-2xl font-bold md:mb-8 md:text-3xl">Mon dossier</h1>
+        <h1 className="mb-6 text-2xl font-bold md:mb-8 md:text-3xl">
+          Mon dossier
+        </h1>
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body text-center">
             <p className="text-base-content/70 mb-4">

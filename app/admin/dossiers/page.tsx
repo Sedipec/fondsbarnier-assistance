@@ -199,7 +199,7 @@ export default function AdminDossiersPage() {
             />
 
             <button
-              className="btn btn-ghost btn-sm absolute right-2 top-2"
+              className="btn btn-ghost btn-sm absolute top-2 right-2"
               onClick={() => {
                 setShowCreateModal(false);
                 setCreateError('');

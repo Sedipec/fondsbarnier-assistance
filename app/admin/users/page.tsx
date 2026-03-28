@@ -134,8 +134,8 @@ export default function AdminUsersPage() {
                     </span>
                   </div>
                 </div>
-                <p className="text-sm text-base-content/60">{user.email}</p>
-                <p className="text-xs text-base-content/40">
+                <p className="text-base-content/60 text-sm">{user.email}</p>
+                <p className="text-base-content/40 text-xs">
                   Inscrit le{' '}
                   {new Date(user.createdAt).toLocaleDateString('fr-FR')}
                 </p>

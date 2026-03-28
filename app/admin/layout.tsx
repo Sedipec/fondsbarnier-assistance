@@ -26,7 +26,7 @@ export default async function AdminLayout({
   return (
     <div className="flex min-h-screen">
       <Sidebar dossierCount={dossierCount} />
-      <main className="bg-base-200 flex-1 p-4 pb-20 pt-16 md:p-6 lg:p-8 lg:pb-8 lg:pt-8">
+      <main className="bg-base-200 flex-1 p-4 pt-16 pb-20 md:p-6 lg:p-8 lg:pt-8 lg:pb-8">
         <Breadcrumb />
         {children}
       </main>

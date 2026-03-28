@@ -31,11 +31,11 @@ function DossierCard({
 }) {
   return (
     <div
-      className="bg-base-100 cursor-pointer border-b p-4 transition-colors last:border-b-0 active:bg-base-200"
+      className="bg-base-100 active:bg-base-200 cursor-pointer border-b p-4 transition-colors last:border-b-0"
       onClick={onClick}
     >
       <div className="mb-2 flex items-center justify-between">
-        <span className="font-mono text-xs text-base-content/60">
+        <span className="text-base-content/60 font-mono text-xs">
           {dossier.reference}
         </span>
         <EtapeBadge etape={dossier.etape} statut={dossier.statut} />
@@ -43,7 +43,7 @@ function DossierCard({
       <p className="font-medium">
         {dossier.nom} {dossier.prenom}
       </p>
-      <div className="mt-1 flex items-center justify-between text-sm text-base-content/60">
+      <div className="text-base-content/60 mt-1 flex items-center justify-between text-sm">
         <span>{dossier.commune ?? '-'}</span>
         <span>{new Date(dossier.createdAt).toLocaleDateString('fr-FR')}</span>
       </div>
@@ -66,7 +66,7 @@ export default function DossierTable({
       {/* Vue mobile : liste de cards */}
       <div className="md:hidden">
         {dossiers.length === 0 ? (
-          <p className="p-6 text-center text-base-content/50">
+          <p className="text-base-content/50 p-6 text-center">
             Aucun dossier trouve.
           </p>
         ) : (
@@ -115,9 +115,7 @@ export default function DossierTable({
                     <td>
                       <EtapeBadge etape={d.etape} statut={d.statut} />
                     </td>
-                    <td>
-                      {new Date(d.createdAt).toLocaleDateString('fr-FR')}
-                    </td>
+                    <td>{new Date(d.createdAt).toLocaleDateString('fr-FR')}</td>
                   </tr>
                 ))
               )}
