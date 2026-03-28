@@ -4,7 +4,7 @@ import bcryptjs from 'bcryptjs';
 import { users } from './schema';
 import { eq } from 'drizzle-orm';
 
-async function seedAdmin() {
+export async function seedAdmin() {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
     console.error('DATABASE_URL est requis');
@@ -71,4 +71,7 @@ async function seedAdmin() {
   }
 }
 
-seedAdmin();
+// Execution directe uniquement si lance comme script
+if (process.env.NODE_ENV !== 'test') {
+  seedAdmin();
+}
