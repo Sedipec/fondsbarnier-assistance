@@ -11,14 +11,21 @@ export async function GET() {
     return NextResponse.json({ error: 'Non autorise.' }, { status: 401 });
   }
 
-  const data = await db
-    .select({
-      id: sources.id,
-      slug: sources.slug,
-      label: sources.label,
-    })
-    .from(sources)
-    .orderBy(asc(sources.label));
+  try {
+    const data = await db
+      .select({
+        id: sources.id,
+        slug: sources.slug,
+        label: sources.label,
+      })
+      .from(sources)
+      .orderBy(asc(sources.label));
 
-  return NextResponse.json({ data });
+    return NextResponse.json({ data, count: data.length });
+  } catch {
+    return NextResponse.json(
+      { error: 'Erreur lors du chargement des sources.' },
+      { status: 500 },
+    );
+  }
 }
