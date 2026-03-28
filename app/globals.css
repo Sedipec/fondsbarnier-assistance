@@ -1,8 +1,2 @@
 @import 'tailwindcss';
 @plugin "daisyui";
-
-/* Empecher le scroll horizontal sur mobile */
-html,
-body {
-  overflow-x: hidden;
-}
