@@ -49,6 +49,7 @@ export default function AdminDossierDetailPage() {
 
   const [dossier, setDossier] = useState<DossierDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const fetchDossier = useCallback(async () => {
     try {
@@ -78,21 +79,28 @@ export default function AdminDossierDetailPage() {
     )
       return;
 
+    setActionError(null);
     try {
-      await fetch(`/api/v1/dossiers/${dossierId}`, {
+      const res = await fetch(`/api/v1/dossiers/${dossierId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ etape: newEtape }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setActionError(data.error || 'Erreur lors du changement d\'etape.');
+        return;
+      }
       fetchDossier();
     } catch {
-      // Silencieux
+      setActionError('Erreur lors du changement d\'etape.');
     }
   }
 
   async function handleToggleDocument(docId: string, received: boolean) {
+    setActionError(null);
     try {
-      await fetch(
+      const res = await fetch(
         `/api/v1/dossiers/${dossierId}/documents/${docId}`,
         {
           method: 'PATCH',
@@ -100,22 +108,33 @@ export default function AdminDossierDetailPage() {
           body: JSON.stringify({ received }),
         },
       );
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setActionError(data.error || 'Erreur lors de la mise a jour du document.');
+        return;
+      }
       fetchDossier();
     } catch {
-      // Silencieux
+      setActionError('Erreur lors de la mise a jour du document.');
     }
   }
 
   async function handleAddNote(content: string) {
+    setActionError(null);
     try {
-      await fetch(`/api/v1/dossiers/${dossierId}/history`, {
+      const res = await fetch(`/api/v1/dossiers/${dossierId}/history`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setActionError(data.error || 'Erreur lors de l\'ajout de la note.');
+        return;
+      }
       fetchDossier();
     } catch {
-      // Silencieux
+      setActionError('Erreur lors de l\'ajout de la note.');
     }
   }
 
@@ -130,15 +149,21 @@ export default function AdminDossierDetailPage() {
     };
     if (!confirm(`Voulez-vous ${labels[statut]} ce dossier ?`)) return;
 
+    setActionError(null);
     try {
-      await fetch(`/api/v1/dossiers/${dossierId}`, {
+      const res = await fetch(`/api/v1/dossiers/${dossierId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ statut }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setActionError(data.error || 'Erreur lors du changement de statut.');
+        return;
+      }
       fetchDossier();
     } catch {
-      // Silencieux
+      setActionError('Erreur lors du changement de statut.');
     }
   }
 
@@ -201,6 +226,18 @@ export default function AdminDossierDetailPage() {
           </div>
         </div>
       </div>
+
+      {actionError && (
+        <div className="alert alert-error mb-6">
+          <span>{actionError}</span>
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={() => setActionError(null)}
+          >
+            X
+          </button>
+        </div>
+      )}
 
       {/* Informations client */}
       <div className="card bg-base-100 mb-6 shadow-xl">
