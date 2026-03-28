@@ -79,7 +79,36 @@ export async function POST(request: NextRequest) {
       .returning({ id: users.id, email: users.email, role: users.role });
 
     return NextResponse.json({ data: newUser }, { status: 201 });
-  } catch {
+  } catch (error) {
+    console.error('[register] Erreur lors de l\'inscription :', error);
+
+    // Contrainte d'unicite violee (email deja utilise, race condition)
+    if (
+      error instanceof Error &&
+      error.message?.includes('unique')
+    ) {
+      return NextResponse.json(
+        { error: 'Un compte avec cet email existe deja.' },
+        { status: 409 },
+      );
+    }
+
+    // Erreur de connexion a la base de donnees
+    if (
+      error instanceof Error &&
+      (error.message?.includes('connect') ||
+        error.message?.includes('ECONNREFUSED') ||
+        error.message?.includes('timeout'))
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            'Le service est temporairement indisponible. Veuillez reessayer dans quelques instants.',
+        },
+        { status: 503 },
+      );
+    }
+
     return NextResponse.json(
       { error: "Une erreur est survenue lors de l'inscription." },
       { status: 500 },
