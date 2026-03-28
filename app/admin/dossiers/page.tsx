@@ -134,11 +134,18 @@ export default function AdminDossiersPage() {
     setSourcesError('');
     try {
       const res = await fetch('/api/v1/sources', { signal });
-      const data = await res.json();
       if (!res.ok) {
-        setSourcesError(data.error || 'Erreur lors du chargement des sources.');
+        let errorMsg = 'Erreur lors du chargement des sources.';
+        try {
+          const errBody = await res.json();
+          if (errBody.error) errorMsg = errBody.error;
+        } catch {
+          // Reponse non-JSON, on garde le message par defaut
+        }
+        setSourcesError(errorMsg);
         return;
       }
+      const data = await res.json();
       if (data.data) setSources(data.data);
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') return;

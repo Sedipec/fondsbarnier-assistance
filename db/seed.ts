@@ -27,20 +27,18 @@ async function seed() {
 
   if (existingAdmin.length > 0) {
     console.log(`Admin ${adminEmail} existe deja.`);
-    await client.end();
-    return;
+  } else {
+    const hashedPassword = await bcryptjs.hash(adminPassword, 12);
+
+    await db.insert(users).values({
+      name: adminName,
+      email: adminEmail,
+      password: hashedPassword,
+      role: 'admin',
+    });
+
+    console.log(`Admin cree: ${adminEmail}`);
   }
-
-  const hashedPassword = await bcryptjs.hash(adminPassword, 12);
-
-  await db.insert(users).values({
-    name: adminName,
-    email: adminEmail,
-    password: hashedPassword,
-    role: 'admin',
-  });
-
-  console.log(`Admin cree: ${adminEmail}`);
 
   // Seed des sources MVP
   const mvpSources = [
@@ -65,6 +63,7 @@ async function seed() {
   }
 
   await client.end();
+  console.log('Seed termine.');
 }
 
 seed().catch((err) => {
