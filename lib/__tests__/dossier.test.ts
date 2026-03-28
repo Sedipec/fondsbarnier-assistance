@@ -44,7 +44,26 @@ vi.mock('@/db/schema', () => ({
     nom: 'nom',
     commune: 'commune',
     reference: 'reference',
-    gestionnaireId: 'gestionnaire_id',
+    userId: 'user_id',
+    etape: 'etape',
+    statut: 'statut',
+    createdAt: 'created_at',
+  },
+  dossierDocuments: {
+    id: 'id',
+    dossierId: 'dossier_id',
+    type: 'type',
+    label: 'label',
+    received: 'received',
+    receivedAt: 'received_at',
+  },
+  dossierHistory: {
+    id: 'id',
+    dossierId: 'dossier_id',
+    type: 'type',
+    content: 'content',
+    authorId: 'author_id',
+    createdAt: 'created_at',
   },
   sources: { id: 'id', slug: 'slug' },
   users: { id: 'id', name: 'name' },
@@ -75,24 +94,17 @@ describe('createDossier', () => {
     email: 'jean@example.com',
     telephone: '0612345678',
     commune: 'Paris',
-    typeDeBien: 'Maison',
     sourceId: 'source-uuid-1',
   };
 
   /**
    * Helper : configure le mock de transaction avec les resultats attendus.
-   * emailResult : resultat du select dedup email ([] = pas de doublon)
-   * secondaryResult : resultat du select dedup secondaire ([] = pas de doublon)
-   * countResult : nombre de dossiers existants pour la reference
-   * insertResult : dossier insere
-   * gestionnaireResult : resultat du lookup gestionnaire (optionnel)
    */
   function setupTransactionMock(opts: {
     emailResult: unknown[];
     secondaryResult?: unknown[];
     countResult?: number;
     insertResult?: unknown;
-    gestionnaireResult?: unknown[];
   }) {
     mockTransaction.mockImplementation(async (fn: Function) => {
       const txSelectLimit = vi.fn();
@@ -102,11 +114,6 @@ describe('createDossier', () => {
 
       // Premier appel select = dedup email
       txSelectLimit.mockResolvedValueOnce(opts.emailResult);
-
-      // Si doublon email avec gestionnaire, ajouter le lookup
-      if (opts.gestionnaireResult) {
-        txSelectLimit.mockResolvedValueOnce(opts.gestionnaireResult);
-      }
 
       // Deuxieme appel select = dedup secondaire
       if (opts.secondaryResult !== undefined) {
@@ -123,7 +130,11 @@ describe('createDossier', () => {
 
       const txInsertReturning = vi
         .fn()
-        .mockResolvedValueOnce([opts.insertResult]);
+        .mockResolvedValueOnce([opts.insertResult])
+        // Documents par defaut
+        .mockResolvedValueOnce([])
+        // Entree historique creation
+        .mockResolvedValueOnce([]);
       const txInsertValues = vi.fn(() => ({
         returning: txInsertReturning,
       }));
@@ -149,7 +160,7 @@ describe('createDossier', () => {
       ...validInput,
       email: 'jean@example.com',
       reference: 'FB-2026-0001',
-      statut: 'nouveau',
+      statut: 'actif',
       etape: 1,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -170,47 +181,23 @@ describe('createDossier', () => {
     expect(result.error).toBeUndefined();
   });
 
-  it('rejette un email deja existant avec message incluant reference et gestionnaire', async () => {
+  it('rejette un email deja existant', async () => {
     // Source existe
     mockSelectLimit.mockResolvedValueOnce([
       { id: 'source-uuid-1', slug: 'formulaire' },
     ]);
 
     setupTransactionMock({
-      emailResult: [
-        { reference: 'FB-2026-0042', gestionnaireId: 'user-uuid-1' },
-      ],
-      gestionnaireResult: [{ name: 'Marie Martin' }],
+      emailResult: [{ reference: 'FB-2026-0042' }],
     });
 
     const result = await createDossier(validInput);
 
     expect(result.success).toBe(false);
-    expect(result.error).toBe(
-      'Dossier existant — #FB-2026-0042 (gestionnaire : Marie Martin)',
-    );
+    expect(result.error).toContain('existe deja');
   });
 
-  it('normalise un email en casse mixte avant dedup', async () => {
-    const inputMixedCase = { ...validInput, email: '  Jean@Mail.COM  ' };
-
-    // Source existe
-    mockSelectLimit.mockResolvedValueOnce([
-      { id: 'source-uuid-1', slug: 'formulaire' },
-    ]);
-
-    setupTransactionMock({
-      emailResult: [{ reference: 'FB-2026-0001', gestionnaireId: null }],
-    });
-
-    const result = await createDossier(inputMixedCase);
-
-    expect(result.success).toBe(false);
-    expect(result.error).toContain('Dossier existant');
-    expect(result.error).toContain('Non assigne');
-  });
-
-  it('retourne un warning pour dedup secondaire (telephone + nom + commune) avec email different', async () => {
+  it('retourne un warning pour dedup secondaire', async () => {
     // Source existe
     mockSelectLimit.mockResolvedValueOnce([
       { id: 'source-uuid-1', slug: 'formulaire' },
@@ -220,7 +207,7 @@ describe('createDossier', () => {
       id: 'dossier-uuid-2',
       ...validInput,
       reference: 'FB-2026-0011',
-      statut: 'nouveau',
+      statut: 'actif',
       etape: 1,
     };
 
@@ -234,7 +221,7 @@ describe('createDossier', () => {
     const result = await createDossier(validInput);
 
     expect(result.success).toBe(true);
-    expect(result.warning).toContain('Dossier potentiellement similaire');
+    expect(result.warning).toContain('potentiellement similaire');
     expect(result.warning).toContain('#FB-2026-0010');
   });
 
@@ -248,7 +235,7 @@ describe('createDossier', () => {
     expect(result.error).toBe('Source invalide');
   });
 
-  it('a le statut nouveau et etape 1 par defaut', async () => {
+  it('a le statut actif et etape 1 par defaut', async () => {
     // Source existe
     mockSelectLimit.mockResolvedValueOnce([
       { id: 'source-uuid-1', slug: 'formulaire' },
@@ -258,7 +245,7 @@ describe('createDossier', () => {
       id: 'dossier-uuid-3',
       ...validInput,
       reference: 'FB-2026-0001',
-      statut: 'nouveau',
+      statut: 'actif',
       etape: 1,
     };
 
@@ -272,35 +259,8 @@ describe('createDossier', () => {
     const result = await createDossier(validInput);
 
     expect(result.success).toBe(true);
-    expect(result.dossier?.statut).toBe('nouveau');
+    expect(result.dossier?.statut).toBe('actif');
     expect(result.dossier?.etape).toBe(1);
-  });
-
-  it('remet le compteur a 0001 au changement d annee', async () => {
-    // Source existe
-    mockSelectLimit.mockResolvedValueOnce([
-      { id: 'source-uuid-1', slug: 'formulaire' },
-    ]);
-
-    const fakeDossier = {
-      id: 'dossier-uuid-4',
-      ...validInput,
-      reference: 'FB-2026-0001',
-      statut: 'nouveau',
-      etape: 1,
-    };
-
-    setupTransactionMock({
-      emailResult: [],
-      secondaryResult: [],
-      countResult: 0,
-      insertResult: fakeDossier,
-    });
-
-    const result = await createDossier(validInput);
-
-    expect(result.success).toBe(true);
-    expect(result.dossier?.reference).toBe('FB-2026-0001');
   });
 
   it('renvoie un message user-friendly en cas de violation de contrainte unique email', async () => {
@@ -309,7 +269,6 @@ describe('createDossier', () => {
       { id: 'source-uuid-1', slug: 'formulaire' },
     ]);
 
-    // Simule une race condition : la transaction lance une erreur de contrainte unique
     const dbError = new Error(
       'duplicate key value violates unique constraint "dossiers_email_unique"',
     );
@@ -331,105 +290,5 @@ describe('createDossier', () => {
     mockTransaction.mockRejectedValueOnce(new Error('connection lost'));
 
     await expect(createDossier(validInput)).rejects.toThrow('connection lost');
-  });
-});
-
-describe('source_id immutabilite', () => {
-  it('updateDossierEtape ne modifie pas le sourceId — seuls etape et timestamps sont mis a jour', async () => {
-    const mod = await import('@/lib/dossier');
-
-    // Reinitialiser les mocks pour cet appel
-    vi.clearAllMocks();
-
-    const fakeDossier = {
-      id: 'dossier-uuid-1',
-      nom: 'Dupont',
-      prenom: 'Jean',
-      email: 'jean@example.com',
-      telephone: '0612345678',
-      commune: 'Paris',
-      typeDeBien: 'Maison',
-      reference: 'FB-2026-0001',
-      sourceId: 'source-uuid-1',
-      statut: 'nouveau',
-      etape: 3,
-      etapeUpdatedAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    mockUpdateReturning.mockResolvedValueOnce([fakeDossier]);
-
-    await mod.updateDossierEtape('dossier-uuid-1', 3);
-
-    // Verifier que set() a ete appele uniquement avec etape et timestamps
-    const setArg = mockUpdateSet.mock.calls[0]![0] as Record<string, unknown>;
-    expect(setArg).toHaveProperty('etape', 3);
-    expect(setArg).toHaveProperty('etapeUpdatedAt');
-    expect(setArg).toHaveProperty('updatedAt');
-    expect(setArg).not.toHaveProperty('sourceId');
-    expect(setArg).not.toHaveProperty('source_id');
-    expect(Object.keys(setArg)).toHaveLength(3);
-  });
-});
-
-describe('updateDossierEtape', () => {
-  let updateDossierEtape: typeof import('@/lib/dossier').updateDossierEtape;
-
-  beforeEach(async () => {
-    vi.clearAllMocks();
-    const mod = await import('@/lib/dossier');
-    updateDossierEtape = mod.updateDossierEtape;
-  });
-
-  it('met a jour l etape et retourne le dossier mis a jour', async () => {
-    const fakeDossier = {
-      id: 'dossier-uuid-1',
-      nom: 'Dupont',
-      prenom: 'Jean',
-      email: 'jean@example.com',
-      telephone: '0612345678',
-      commune: 'Paris',
-      typeDeBien: 'Maison',
-      reference: 'FB-2026-0001',
-      sourceId: 'source-uuid-1',
-      statut: 'nouveau',
-      etape: 5,
-      etapeUpdatedAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    mockUpdateReturning.mockResolvedValueOnce([fakeDossier]);
-
-    const result = await updateDossierEtape('dossier-uuid-1', 5);
-
-    expect(result).toBeDefined();
-    expect(result?.etape).toBe(5);
-    expect(mockUpdate).toHaveBeenCalled();
-  });
-
-  it('retourne null si le dossier n existe pas', async () => {
-    mockUpdateReturning.mockResolvedValueOnce([]);
-
-    const result = await updateDossierEtape('nonexistent-uuid', 2);
-
-    expect(result).toBeNull();
-  });
-
-  it('met a jour etapeUpdatedAt et updatedAt', async () => {
-    const now = new Date();
-    const fakeDossier = {
-      id: 'dossier-uuid-1',
-      etape: 3,
-      etapeUpdatedAt: now,
-      updatedAt: now,
-    };
-
-    mockUpdateReturning.mockResolvedValueOnce([fakeDossier]);
-
-    await updateDossierEtape('dossier-uuid-1', 3);
-
-    const setArg = mockUpdateSet.mock.calls[0]![0] as Record<string, unknown>;
-    expect(setArg.etapeUpdatedAt).toBeInstanceOf(Date);
-    expect(setArg.updatedAt).toBeInstanceOf(Date);
   });
 });

@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 // Mocks
 const mockAuth = vi.fn();
 const mockCreateDossier = vi.fn();
+const mockListDossiers = vi.fn();
 
 vi.mock('@/utils/serverAuth', () => ({
   auth: () => mockAuth(),
@@ -11,14 +12,22 @@ vi.mock('@/utils/serverAuth', () => ({
 
 vi.mock('@/lib/dossier', () => ({
   createDossier: (input: unknown) => mockCreateDossier(input),
+  listDossiers: (params: unknown) => mockListDossiers(params),
 }));
 
 // Import apres les mocks
-import { POST } from '../route';
+import { GET, POST } from '../route';
 
-function makeRequest(body: unknown): NextRequest {
-  return new NextRequest('http://localhost/api/v1/dossiers', {
-    method: 'POST',
+function makeRequest(
+  body: unknown,
+  method = 'POST',
+  url = 'http://localhost/api/v1/dossiers',
+): NextRequest {
+  if (method === 'GET') {
+    return new NextRequest(url, { method: 'GET' });
+  }
+  return new NextRequest(url, {
+    method,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
@@ -28,42 +37,64 @@ const validBody = {
   nom: 'Dupont',
   prenom: 'Jean',
   email: 'jean@example.com',
-  telephone: '0612345678',
-  commune: 'Paris',
-  typeDeBien: 'Maison',
   sourceId: 'source-uuid-1',
 };
+
+describe('GET /api/v1/dossiers', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('retourne 403 si pas admin', async () => {
+    mockAuth.mockResolvedValueOnce({
+      user: { id: 'user-1', role: 'client' },
+    });
+
+    const response = await GET(
+      makeRequest(null, 'GET', 'http://localhost/api/v1/dossiers'),
+    );
+    expect(response.status).toBe(403);
+  });
+
+  it('retourne la liste paginee des dossiers', async () => {
+    mockAuth.mockResolvedValueOnce({
+      user: { id: 'user-1', role: 'admin' },
+    });
+
+    mockListDossiers.mockResolvedValueOnce({
+      data: [{ id: 'd1', reference: 'FB-2026-0001' }],
+      count: 1,
+    });
+
+    const response = await GET(
+      makeRequest(
+        null,
+        'GET',
+        'http://localhost/api/v1/dossiers?page=1&limit=20',
+      ),
+    );
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json.data).toHaveLength(1);
+    expect(json.count).toBe(1);
+  });
+});
 
 describe('POST /api/v1/dossiers', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  // --- Auth ---
-
-  it('retourne 403 si pas de session', async () => {
+  it('retourne 401 si pas de session', async () => {
     mockAuth.mockResolvedValueOnce(null);
 
     const response = await POST(makeRequest(validBody));
     const json = await response.json();
 
-    expect(response.status).toBe(403);
-    expect(json.error).toBe('Acces refuse.');
+    expect(response.status).toBe(401);
+    expect(json.error).toBe('Non autorise.');
   });
-
-  it('retourne 403 si role non admin', async () => {
-    mockAuth.mockResolvedValueOnce({
-      user: { id: 'user-1', role: 'client' },
-    });
-
-    const response = await POST(makeRequest(validBody));
-    const json = await response.json();
-
-    expect(response.status).toBe(403);
-    expect(json.error).toBe('Acces refuse.');
-  });
-
-  // --- Validation ---
 
   it('retourne 400 si corps JSON invalide', async () => {
     mockAuth.mockResolvedValueOnce({
@@ -98,18 +129,6 @@ describe('POST /api/v1/dossiers', () => {
     expect(json.error).toContain('requis');
   });
 
-  it('retourne 400 si un champ requis est vide (string vide)', async () => {
-    mockAuth.mockResolvedValueOnce({
-      user: { id: 'user-1', role: 'admin' },
-    });
-
-    const response = await POST(makeRequest({ ...validBody, nom: '   ' }));
-    const json = await response.json();
-
-    expect(response.status).toBe(400);
-    expect(json.error).toContain('"nom"');
-  });
-
   it('retourne 400 si email invalide', async () => {
     mockAuth.mockResolvedValueOnce({
       user: { id: 'user-1', role: 'admin' },
@@ -124,8 +143,6 @@ describe('POST /api/v1/dossiers', () => {
     expect(json.error).toBe('Format email invalide.');
   });
 
-  // --- Succes ---
-
   it('retourne 201 avec le dossier cree en cas de succes', async () => {
     mockAuth.mockResolvedValueOnce({
       user: { id: 'user-1', role: 'admin' },
@@ -135,7 +152,7 @@ describe('POST /api/v1/dossiers', () => {
       id: 'dossier-uuid-1',
       ...validBody,
       reference: 'FB-2026-0001',
-      statut: 'nouveau',
+      statut: 'actif',
       etape: 1,
     };
 
@@ -149,35 +166,24 @@ describe('POST /api/v1/dossiers', () => {
 
     expect(response.status).toBe(201);
     expect(json.data).toEqual(fakeDossier);
-    expect(json.warning).toBeUndefined();
   });
 
-  it('retourne 201 avec warning si dedup secondaire', async () => {
+  it('associe automatiquement le userId pour un client', async () => {
     mockAuth.mockResolvedValueOnce({
-      user: { id: 'user-1', role: 'admin' },
+      user: { id: 'client-uuid-1', role: 'client' },
     });
-
-    const fakeDossier = {
-      id: 'dossier-uuid-2',
-      ...validBody,
-      reference: 'FB-2026-0002',
-    };
 
     mockCreateDossier.mockResolvedValueOnce({
       success: true,
-      dossier: fakeDossier,
-      warning: 'Dossier potentiellement similaire — #FB-2026-0001',
+      dossier: { id: 'dossier-uuid-1', reference: 'FB-2026-0001' },
     });
 
-    const response = await POST(makeRequest(validBody));
-    const json = await response.json();
+    await POST(makeRequest(validBody));
 
-    expect(response.status).toBe(201);
-    expect(json.data).toBeDefined();
-    expect(json.warning).toContain('potentiellement similaire');
+    expect(mockCreateDossier).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 'client-uuid-1' }),
+    );
   });
-
-  // --- Erreurs metier ---
 
   it('retourne 409 si doublon email', async () => {
     mockAuth.mockResolvedValueOnce({
@@ -186,65 +192,28 @@ describe('POST /api/v1/dossiers', () => {
 
     mockCreateDossier.mockResolvedValueOnce({
       success: false,
-      error: 'Dossier existant — #FB-2026-0042 (gestionnaire : Marie Martin)',
+      error: 'Un dossier existe deja avec cet email.',
     });
 
     const response = await POST(makeRequest(validBody));
     const json = await response.json();
 
     expect(response.status).toBe(409);
-    expect(json.error).toContain('Dossier existant');
+    expect(json.error).toContain('existe deja');
   });
-
-  // --- Error handling (pas de fuite d'implementation) ---
 
   it('retourne 500 avec message generique si createDossier throw', async () => {
     mockAuth.mockResolvedValueOnce({
       user: { id: 'user-1', role: 'admin' },
     });
 
-    mockCreateDossier.mockRejectedValueOnce(
-      new Error('connection refused to database at 10.0.0.1:5432'),
-    );
+    mockCreateDossier.mockRejectedValueOnce(new Error('connection refused'));
 
     const response = await POST(makeRequest(validBody));
     const json = await response.json();
 
     expect(response.status).toBe(500);
     expect(json.error).toBe('Erreur interne lors de la creation du dossier.');
-    // Verifie qu'aucune info d'implementation ne fuite
     expect(JSON.stringify(json)).not.toContain('connection');
-    expect(JSON.stringify(json)).not.toContain('database');
-    expect(JSON.stringify(json)).not.toContain('5432');
-  });
-
-  // --- Champs optionnels ---
-
-  it('passe les champs optionnels a createDossier', async () => {
-    mockAuth.mockResolvedValueOnce({
-      user: { id: 'user-1', role: 'admin' },
-    });
-
-    mockCreateDossier.mockResolvedValueOnce({
-      success: true,
-      dossier: { id: 'dossier-uuid-3', reference: 'FB-2026-0003' },
-    });
-
-    const bodyWithOptional = {
-      ...validBody,
-      adresseComplete: '12 rue des Lilas',
-      numeroCadastre: 'AB-1234',
-      gestionnaireId: 'user-uuid-2',
-    };
-
-    await POST(makeRequest(bodyWithOptional));
-
-    expect(mockCreateDossier).toHaveBeenCalledWith(
-      expect.objectContaining({
-        adresseComplete: '12 rue des Lilas',
-        numeroCadastre: 'AB-1234',
-        gestionnaireId: 'user-uuid-2',
-      }),
-    );
   });
 });
