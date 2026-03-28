@@ -37,6 +37,8 @@ export default function AdminDossiersPage() {
   const [displaySearch, setDisplaySearch] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [sources, setSources] = useState<Source[]>([]);
+  const [sourcesLoading, setSourcesLoading] = useState(false);
+  const [sourcesError, setSourcesError] = useState('');
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -127,18 +129,31 @@ export default function AdminDossiersPage() {
   }
 
   // Charger les sources depuis l'API a l'ouverture du modal
+  const fetchSources = useCallback(async () => {
+    setSourcesLoading(true);
+    setSourcesError('');
+    try {
+      const res = await fetch('/api/v1/sources');
+      const data = await res.json();
+      if (!res.ok) {
+        setSourcesError(data.error || 'Erreur lors du chargement des sources.');
+        return;
+      }
+      if (data.data) setSources(data.data);
+    } catch {
+      setSourcesError(
+        'Impossible de charger les sources. Verifiez votre connexion.',
+      );
+    } finally {
+      setSourcesLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (showCreateModal && sources.length === 0) {
-      fetch('/api/v1/sources')
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.data) setSources(data.data);
-        })
-        .catch(() => {
-          // Silencieux — le formulaire affichera une liste vide
-        });
+      fetchSources();
     }
-  }, [showCreateModal, sources.length]);
+  }, [showCreateModal, sources.length, fetchSources]);
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -194,6 +209,9 @@ export default function AdminDossiersPage() {
 
             <DossierForm
               sources={sources}
+              sourcesLoading={sourcesLoading}
+              sourcesError={sourcesError}
+              onRetrySources={fetchSources}
               onSubmit={handleCreateDossier}
               loading={createLoading}
             />
