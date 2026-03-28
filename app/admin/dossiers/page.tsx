@@ -134,6 +134,8 @@ export default function AdminDossiersPage() {
     setSourcesError('');
     try {
       const res = await fetch('/api/v1/sources', { signal });
+      // Verifier si la requete a ete annulee pendant le fetch
+      if (signal?.aborted) return;
       if (!res.ok) {
         let errorMsg = 'Erreur lors du chargement des sources.';
         try {
@@ -146,9 +148,11 @@ export default function AdminDossiersPage() {
         return;
       }
       const data = await res.json();
+      if (signal?.aborted) return;
       if (data.data) setSources(data.data);
-    } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') return;
+    } catch {
+      // Ignorer les erreurs des requetes annulees
+      if (signal?.aborted) return;
       setSourcesError(
         'Impossible de charger les sources. Vérifiez votre connexion.',
       );
@@ -158,12 +162,12 @@ export default function AdminDossiersPage() {
   }, []);
 
   useEffect(() => {
-    if (showCreateModal && sources.length === 0) {
-      const controller = new AbortController();
-      fetchSources(controller.signal);
-      return () => controller.abort();
-    }
-  }, [showCreateModal, sources.length, fetchSources]);
+    if (!showCreateModal) return;
+    // Toujours refetcher a l'ouverture du modal pour eviter les donnees stale
+    const controller = new AbortController();
+    fetchSources(controller.signal);
+    return () => controller.abort();
+  }, [showCreateModal, fetchSources]);
 
   return (
     <div className="mx-auto max-w-6xl">

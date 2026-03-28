@@ -64,7 +64,7 @@ describe('DossierForm', () => {
   });
 
   describe('etat erreur des sources', () => {
-    it('affiche le message d\'erreur quand sourcesError est defini', () => {
+    it("affiche le message d'erreur quand sourcesError est defini", () => {
       render(
         <DossierForm
           {...defaultProps}
@@ -106,15 +106,29 @@ describe('DossierForm', () => {
 
     it('ne montre pas le bouton Réessayer sans onRetrySources', () => {
       render(
-        <DossierForm
-          {...defaultProps}
-          sources={[]}
-          sourcesError="Erreur"
-        />,
+        <DossierForm {...defaultProps} sources={[]} sourcesError="Erreur" />,
       );
       expect(
         screen.queryByRole('button', { name: 'Réessayer' }),
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('sources vides (aucune source en base)', () => {
+    it('affiche un message quand sources est vide sans erreur ni chargement', () => {
+      render(<DossierForm {...defaultProps} sources={[]} />);
+      expect(screen.getByText('Aucune source disponible.')).toBeInTheDocument();
+      expect(screen.queryByLabelText('Source *')).not.toBeInTheDocument();
+    });
+
+    it('affiche le bouton Réessayer quand sources est vide et onRetrySources fourni', () => {
+      const onRetry = vi.fn();
+      render(
+        <DossierForm {...defaultProps} sources={[]} onRetrySources={onRetry} />,
+      );
+      expect(screen.getByText('Aucune source disponible.')).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: 'Réessayer' }));
+      expect(onRetry).toHaveBeenCalledOnce();
     });
   });
 
@@ -169,7 +183,9 @@ describe('DossierForm', () => {
         target: { value: 'jean@dupont.fr', name: 'email' },
       });
 
-      fireEvent.submit(screen.getByRole('button', { name: 'Creer le dossier' }));
+      fireEvent.submit(
+        screen.getByRole('button', { name: 'Creer le dossier' }),
+      );
 
       expect(onSubmit).toHaveBeenCalledWith(
         expect.objectContaining({
