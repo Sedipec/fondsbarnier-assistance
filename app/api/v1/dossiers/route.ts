@@ -1,21 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/utils/serverAuth';
-import { createDossier } from '@/lib/dossier';
+import { createDossier, listDossiers } from '@/lib/dossier';
 
-const REQUIRED_FIELDS = [
-  'nom',
-  'prenom',
-  'email',
-  'telephone',
-  'commune',
-  'typeDeBien',
-  'sourceId',
-] as const;
+const REQUIRED_FIELDS = ['nom', 'prenom', 'email', 'sourceId'] as const;
+
+export async function GET(request: NextRequest) {
+  const session = await auth();
+
+  if (!session?.user || session.user.role !== 'admin') {
+    return NextResponse.json({ error: 'Acces refuse.' }, { status: 403 });
+  }
+
+  const { searchParams } = request.nextUrl;
+  const etape = searchParams.get('etape');
+  const statut = searchParams.get('statut');
+  const search = searchParams.get('search');
+  const page = searchParams.get('page');
+  const limit = searchParams.get('limit');
+
+  const result = await listDossiers({
+    etape: etape ? Number(etape) : undefined,
+    statut: statut || undefined,
+    search: search || undefined,
+    page: page ? Number(page) : 1,
+    limit: limit ? Number(limit) : 20,
+  });
+
+  return NextResponse.json({ data: result.data, count: result.count });
+}
 
 export async function POST(request: NextRequest) {
   const session = await auth();
 
-  if (!session?.user || session.user.role !== 'admin') {
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Non autorise.' }, { status: 401 });
+  }
+
+  // Seuls les admins peuvent creer des dossiers
+  if (session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Acces refuse.' }, { status: 403 });
   }
 
@@ -49,21 +71,21 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const userId = body.userId ? String(body.userId) : null;
+
   let result;
   try {
     result = await createDossier({
       nom: String(body.nom),
       prenom: String(body.prenom),
       email: emailStr,
-      telephone: String(body.telephone),
-      commune: String(body.commune),
-      typeDeBien: String(body.typeDeBien),
+      telephone: body.telephone ? String(body.telephone) : null,
+      commune: body.commune ? String(body.commune) : null,
+      adresse: body.adresse ? String(body.adresse) : null,
+      codePostal: body.codePostal ? String(body.codePostal) : null,
+      cadastre: body.cadastre ? String(body.cadastre) : null,
       sourceId: String(body.sourceId),
-      adresseComplete: body.adresseComplete
-        ? String(body.adresseComplete)
-        : null,
-      numeroCadastre: body.numeroCadastre ? String(body.numeroCadastre) : null,
-      gestionnaireId: body.gestionnaireId ? String(body.gestionnaireId) : null,
+      userId,
     });
   } catch {
     return NextResponse.json(

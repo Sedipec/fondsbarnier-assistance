@@ -8,6 +8,7 @@ import {
   integer,
   uniqueIndex,
   index,
+  boolean,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import type { AdapterAccountType } from 'next-auth/adapters';
@@ -88,12 +89,29 @@ export const sources = pgTable('sources', {
 
 // Enum pour les statuts de dossier
 export const dossierStatutEnum = pgEnum('dossier_statut', [
-  'nouveau',
-  'en_cours',
-  'en_attente',
-  'accepte',
-  'refuse',
-  'cloture',
+  'actif',
+  'suspendu',
+  'clos',
+  'non_eligible',
+]);
+
+// Enum pour les types de document
+export const documentTypeEnum = pgEnum('document_type', [
+  'assurance',
+  'cadastre',
+  'rib',
+  'devis',
+  'diagnostic',
+  'valeur_venale',
+  'autre',
+]);
+
+// Enum pour les types d'historique
+export const historyTypeEnum = pgEnum('history_type', [
+  'note',
+  'etape_change',
+  'document',
+  'creation',
 ]);
 
 // Table dossiers
@@ -101,27 +119,22 @@ export const dossiers = pgTable(
   'dossiers',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    nom: text('nom').notNull(),
-    prenom: text('prenom').notNull(),
-    email: text('email').notNull(),
-    telephone: text('telephone').notNull(),
-    commune: text('commune').notNull(),
-    typeDeBien: text('type_de_bien').notNull(),
-    adresseComplete: text('adresse_complete'),
-    numeroCadastre: text('numero_cadastre'),
     reference: text('reference').unique().notNull(),
+    userId: uuid('user_id').references(() => users.id),
     sourceId: uuid('source_id')
       .notNull()
       .references(() => sources.id),
-    gestionnaireId: uuid('gestionnaire_id').references(() => users.id),
-    statut: dossierStatutEnum('statut').default('nouveau').notNull(),
+    nom: text('nom').notNull(),
+    prenom: text('prenom').notNull(),
+    email: text('email').notNull(),
+    telephone: text('telephone'),
+    adresse: text('adresse'),
+    commune: text('commune'),
+    codePostal: text('code_postal'),
+    cadastre: text('cadastre'),
+    statut: dossierStatutEnum('statut').default('actif').notNull(),
     etape: integer('etape').default(1).notNull(),
-    etapeUpdatedAt: timestamp('etape_updated_at', { mode: 'date' })
-      .defaultNow()
-      .notNull(),
-    hubspotDealId: text('hubspot_deal_id'),
-    magicLinkToken: text('magic_link_token'),
-    magicLinkExpiresAt: timestamp('magic_link_expires_at', { mode: 'date' }),
+    etapeUpdatedAt: timestamp('etape_updated_at', { mode: 'date' }),
     createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().notNull(),
   },
@@ -132,12 +145,37 @@ export const dossiers = pgTable(
     ),
     index('dossiers_dedup_secondary').using(
       'btree',
-      sql`lower(trim(${table.telephone}))`,
-      sql`lower(trim(${table.nom}))`,
-      sql`lower(trim(${table.commune}))`,
+      sql`lower(${table.telephone})`,
+      sql`lower(${table.nom})`,
+      sql`lower(${table.commune})`,
     ),
   ],
 );
+
+// Table dossier_documents (checklist de pieces justificatives)
+export const dossierDocuments = pgTable('dossier_documents', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  dossierId: uuid('dossier_id')
+    .notNull()
+    .references(() => dossiers.id, { onDelete: 'cascade' }),
+  type: documentTypeEnum('type').notNull(),
+  label: text('label').notNull(),
+  received: boolean('received').default(false).notNull(),
+  receivedAt: timestamp('received_at', { mode: 'date' }),
+  fileUrl: text('file_url'),
+});
+
+// Table dossier_history (notes + transitions d'etape)
+export const dossierHistory = pgTable('dossier_history', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  dossierId: uuid('dossier_id')
+    .notNull()
+    .references(() => dossiers.id, { onDelete: 'cascade' }),
+  type: historyTypeEnum('type').notNull(),
+  content: text('content').notNull(),
+  authorId: uuid('author_id').references(() => users.id),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+});
 
 // Table admin_invitations
 export const adminInvitations = pgTable('admin_invitations', {
