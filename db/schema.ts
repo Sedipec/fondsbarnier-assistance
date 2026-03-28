@@ -9,6 +9,7 @@ import {
   uniqueIndex,
   index,
   boolean,
+  jsonb,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import type { AdapterAccountType } from 'next-auth/adapters';
@@ -25,6 +26,11 @@ export const users = pgTable('users', {
   password: text('password'),
   role: roleEnum('role').default('client').notNull(),
   image: text('image'),
+  phone: text('phone'),
+  notificationPreferences: jsonb('notification_preferences')
+    .$type<{ email: boolean; dossierUpdates: boolean; newsletter: boolean }>()
+    .default({ email: true, dossierUpdates: true, newsletter: false })
+    .notNull(),
   isActive: integer('is_active').default(1).notNull(),
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().notNull(),

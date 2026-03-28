@@ -4,7 +4,7 @@ import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
-// Desactiver / activer un utilisateur
+// Modifier un utilisateur (activation/desactivation + role)
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ userId: string }> },
@@ -12,7 +12,7 @@ export async function PATCH(
   const session = await auth();
 
   if (!session?.user || session.user.role !== 'admin') {
-    return NextResponse.json({ error: 'Acces refuse.' }, { status: 403 });
+    return NextResponse.json({ error: 'Accès refusé.' }, { status: 403 });
   }
 
   const { userId } = await params;
@@ -24,32 +24,77 @@ export async function PATCH(
     return NextResponse.json({ error: 'JSON invalide.' }, { status: 400 });
   }
 
-  // Validate isActive: must be 0 or 1
-  const isActive = Number(body.isActive);
-  if (isActive !== 0 && isActive !== 1) {
+  const updateData: {
+    isActive?: number;
+    role?: 'admin' | 'client';
+    updatedAt: Date;
+  } = {
+    updatedAt: new Date(),
+  };
+
+  // Gestion isActive
+  if (body.isActive !== undefined) {
+    const isActive = Number(body.isActive);
+    if (isActive !== 0 && isActive !== 1) {
+      return NextResponse.json(
+        { error: 'Valeur isActive invalide (0 ou 1 attendu).' },
+        { status: 400 },
+      );
+    }
+
+    // Empecher un admin de se desactiver lui-meme
+    if (userId === session.user.id && isActive === 0) {
+      return NextResponse.json(
+        { error: 'Vous ne pouvez pas désactiver votre propre compte.' },
+        { status: 400 },
+      );
+    }
+
+    updateData.isActive = isActive;
+  }
+
+  // Gestion du role
+  if (body.role !== undefined) {
+    if (body.role !== 'admin' && body.role !== 'client') {
+      return NextResponse.json(
+        { error: 'Rôle invalide (admin ou client attendu).' },
+        { status: 400 },
+      );
+    }
+
+    // Empecher un admin de changer son propre role
+    if (userId === session.user.id) {
+      return NextResponse.json(
+        { error: 'Vous ne pouvez pas modifier votre propre rôle.' },
+        { status: 400 },
+      );
+    }
+
+    updateData.role = body.role;
+  }
+
+  // Pas de champ à mettre à jour
+  if (updateData.isActive === undefined && updateData.role === undefined) {
     return NextResponse.json(
-      { error: 'Valeur isActive invalide (0 ou 1 attendu).' },
+      { error: 'Aucun champ à modifier (isActive ou role attendu).' },
       { status: 400 },
     );
   }
 
-  // Empecher un admin de se desactiver lui-meme
-  if (userId === session.user.id && isActive === 0) {
-    return NextResponse.json(
-      { error: 'Vous ne pouvez pas desactiver votre propre compte.' },
-      { status: 400 },
-    );
-  }
-
-  await db
+  const [updated] = await db
     .update(users)
-    .set({
-      isActive,
-      updatedAt: new Date(),
-    })
-    .where(eq(users.id, userId));
+    .set(updateData)
+    .where(eq(users.id, userId))
+    .returning({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      role: users.role,
+      isActive: users.isActive,
+      updatedAt: users.updatedAt,
+    });
 
-  return NextResponse.json({ data: { id: userId, isActive } });
+  return NextResponse.json({ data: updated });
 }
 
 // Supprimer un utilisateur
@@ -60,7 +105,7 @@ export async function DELETE(
   const session = await auth();
 
   if (!session?.user || session.user.role !== 'admin') {
-    return NextResponse.json({ error: 'Acces refuse.' }, { status: 403 });
+    return NextResponse.json({ error: 'Accès refusé.' }, { status: 403 });
   }
 
   const { userId } = await params;
