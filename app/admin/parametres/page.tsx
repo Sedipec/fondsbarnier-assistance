@@ -13,7 +13,7 @@ const tabs = [
   { id: 'password', label: 'Mot de passe', icon: Lock },
   { id: 'users', label: 'Utilisateurs', icon: Users },
   { id: 'config', label: 'Configuration', icon: Cog },
-  { id: 'roles', label: 'Roles', icon: Shield },
+  { id: 'roles', label: 'Rôles', icon: Shield },
 ] as const;
 
 type TabId = (typeof tabs)[number]['id'];
@@ -23,7 +23,7 @@ export default function AdminParametresPage() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <h1 className="mb-8 text-3xl font-bold">Parametres</h1>
+      <h1 className="mb-8 text-3xl font-bold">Paramètres</h1>
 
       {/* Onglets */}
       <div role="tablist" className="tabs tabs-bordered mb-6">
@@ -74,7 +74,7 @@ export default function AdminParametresPage() {
           )}
           {activeTab === 'roles' && (
             <>
-              <h2 className="card-title mb-4">Gestion des roles</h2>
+              <h2 className="card-title mb-4">Gestion des rôles</h2>
               <RoleManagement />
             </>
           )}

@@ -12,7 +12,7 @@ export async function PATCH(
   const session = await auth();
 
   if (!session?.user || session.user.role !== 'admin') {
-    return NextResponse.json({ error: 'Acces refuse.' }, { status: 403 });
+    return NextResponse.json({ error: 'Accès refusé.' }, { status: 403 });
   }
 
   const { userId } = await params;
@@ -45,7 +45,7 @@ export async function PATCH(
     // Empecher un admin de se desactiver lui-meme
     if (userId === session.user.id && isActive === 0) {
       return NextResponse.json(
-        { error: 'Vous ne pouvez pas desactiver votre propre compte.' },
+        { error: 'Vous ne pouvez pas désactiver votre propre compte.' },
         { status: 400 },
       );
     }
@@ -57,7 +57,7 @@ export async function PATCH(
   if (body.role !== undefined) {
     if (body.role !== 'admin' && body.role !== 'client') {
       return NextResponse.json(
-        { error: 'Role invalide (admin ou client attendu).' },
+        { error: 'Rôle invalide (admin ou client attendu).' },
         { status: 400 },
       );
     }
@@ -65,7 +65,7 @@ export async function PATCH(
     // Empecher un admin de changer son propre role
     if (userId === session.user.id) {
       return NextResponse.json(
-        { error: 'Vous ne pouvez pas modifier votre propre role.' },
+        { error: 'Vous ne pouvez pas modifier votre propre rôle.' },
         { status: 400 },
       );
     }
@@ -105,7 +105,7 @@ export async function DELETE(
   const session = await auth();
 
   if (!session?.user || session.user.role !== 'admin') {
-    return NextResponse.json({ error: 'Acces refuse.' }, { status: 403 });
+    return NextResponse.json({ error: 'Accès refusé.' }, { status: 403 });
   }
 
   const { userId } = await params;

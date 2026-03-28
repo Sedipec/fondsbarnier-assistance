@@ -92,7 +92,7 @@ export default function UserManagement() {
       )}
 
       <p className="text-base-content/60 text-sm">
-        {users.length} utilisateur{users.length > 1 ? 's' : ''} enregistre
+        {users.length} utilisateur{users.length > 1 ? 's' : ''} enregistré
         {users.length > 1 ? 's' : ''}
       </p>
 
@@ -106,7 +106,7 @@ export default function UserManagement() {
                 <span
                   className={`badge badge-sm ${user.isActive ? 'badge-success' : 'badge-error'}`}
                 >
-                  {user.isActive ? 'Actif' : 'Desactive'}
+                  {user.isActive ? 'Actif' : 'Désactivé'}
                 </span>
               </div>
               <p className="text-base-content/60 text-sm">{user.email}</p>
@@ -128,7 +128,7 @@ export default function UserManagement() {
                   className={`btn btn-sm ${user.isActive ? 'btn-warning' : 'btn-success'}`}
                   onClick={() => handleToggleActive(user.id, user.isActive)}
                 >
-                  {user.isActive ? 'Desactiver' : 'Activer'}
+                  {user.isActive ? 'Désactiver' : 'Activer'}
                 </button>
               </div>
             </div>
@@ -143,7 +143,7 @@ export default function UserManagement() {
             <tr>
               <th>Nom</th>
               <th>Email</th>
-              <th>Role</th>
+              <th>Rôle</th>
               <th>Statut</th>
               <th>Inscription</th>
               <th>Actions</th>
@@ -173,7 +173,7 @@ export default function UserManagement() {
                   <span
                     className={`badge ${user.isActive ? 'badge-success' : 'badge-error'}`}
                   >
-                    {user.isActive ? 'Actif' : 'Desactive'}
+                    {user.isActive ? 'Actif' : 'Désactivé'}
                   </span>
                 </td>
                 <td>{new Date(user.createdAt).toLocaleDateString('fr-FR')}</td>
@@ -182,7 +182,7 @@ export default function UserManagement() {
                     className={`btn btn-sm ${user.isActive ? 'btn-warning' : 'btn-success'}`}
                     onClick={() => handleToggleActive(user.id, user.isActive)}
                   >
-                    {user.isActive ? 'Desactiver' : 'Activer'}
+                    {user.isActive ? 'Désactiver' : 'Activer'}
                   </button>
                 </td>
               </tr>

@@ -59,12 +59,12 @@ export default function ProfileForm() {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage('Profil mis a jour avec succes.');
+        setMessage('Profil mis à jour avec succès.');
       } else {
-        setError(data.error || 'Erreur lors de la mise a jour.');
+        setError(data.error || 'Erreur lors de la mise à jour.');
       }
     } catch {
-      setError('Erreur lors de la mise a jour du profil.');
+      setError('Erreur lors de la mise à jour du profil.');
     } finally {
       setSaving(false);
     }
@@ -110,7 +110,7 @@ export default function ProfileForm() {
 
       <div className="form-control">
         <label className="label" htmlFor="profile-phone">
-          <span className="label-text">Telephone</span>
+          <span className="label-text">Téléphone</span>
         </label>
         <input
           id="profile-phone"

@@ -5,11 +5,11 @@ const roles = [
     name: 'Administrateur',
     slug: 'admin',
     description:
-      'Acces complet : gestion des dossiers, utilisateurs, parametres et configuration.',
+      'Accès complet : gestion des dossiers, utilisateurs, paramètres et configuration.',
     permissions: [
       'Gestion des dossiers',
       'Gestion des utilisateurs',
-      "Parametres de l'application",
+      "Paramètres de l'application",
       'Invitations admin',
       'Suivi des dossiers',
     ],
@@ -17,7 +17,7 @@ const roles = [
   {
     name: 'Client',
     slug: 'client',
-    description: 'Acces limite : consultation et suivi de son propre dossier.',
+    description: 'Accès limité : consultation et suivi de son propre dossier.',
     permissions: [
       'Consultation de son dossier',
       'Modification de son profil',

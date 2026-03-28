@@ -11,7 +11,7 @@ const updateProfileSchema = z.object({
   phone: z
     .string()
     .max(20)
-    .regex(/^[+\d\s()-]*$/, 'Numero de telephone invalide.')
+    .regex(/^[+\d\s()-]*$/, 'Numéro de téléphone invalide.')
     .nullable()
     .optional(),
   notificationPreferences: z
@@ -27,7 +27,7 @@ export async function GET() {
   const session = await auth();
 
   if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Non autorise.' }, { status: 401 });
+    return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 });
   }
 
   const user = await db.query.users.findFirst({
@@ -58,7 +58,7 @@ export async function PATCH(request: NextRequest) {
   const session = await auth();
 
   if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Non autorise.' }, { status: 401 });
+    return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 });
   }
 
   let body;
@@ -70,7 +70,7 @@ export async function PATCH(request: NextRequest) {
 
   const result = updateProfileSchema.safeParse(body);
   if (!result.success) {
-    const message = result.error.errors.map((e) => e.message).join(' ');
+    const message = result.error.issues.map((e) => e.message).join(' ');
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
@@ -83,7 +83,7 @@ export async function PATCH(request: NextRequest) {
     });
     if (existing) {
       return NextResponse.json(
-        { error: 'Cet email est deja utilise.' },
+        { error: 'Cet email est déjà utilisé.' },
         { status: 409 },
       );
     }

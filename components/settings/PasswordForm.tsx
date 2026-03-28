@@ -33,7 +33,7 @@ export default function PasswordForm() {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage('Mot de passe modifie avec succes.');
+        setMessage('Mot de passe modifié avec succès.');
         setForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
       } else {
         setError(data.error || 'Erreur lors du changement de mot de passe.');
@@ -77,7 +77,7 @@ export default function PasswordForm() {
           required
         />
         <label className="label">
-          <span className="label-text-alt">Minimum 8 caracteres</span>
+          <span className="label-text-alt">Minimum 8 caractères</span>
         </label>
       </div>
 

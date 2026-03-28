@@ -11,7 +11,7 @@ const changePasswordSchema = z
     currentPassword: z.string().min(1, 'Le mot de passe actuel est requis.'),
     newPassword: z
       .string()
-      .min(8, 'Le nouveau mot de passe doit contenir au moins 8 caracteres.'),
+      .min(8, 'Le nouveau mot de passe doit contenir au moins 8 caractères.'),
     confirmPassword: z.string(),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
@@ -23,7 +23,7 @@ export async function PATCH(request: NextRequest) {
   const session = await auth();
 
   if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Non autorise.' }, { status: 401 });
+    return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 });
   }
 
   let body;
@@ -73,6 +73,6 @@ export async function PATCH(request: NextRequest) {
     .where(eq(users.id, session.user.id));
 
   return NextResponse.json({
-    data: { message: 'Mot de passe modifie avec succes.' },
+    data: { message: 'Mot de passe modifié avec succès.' },
   });
 }

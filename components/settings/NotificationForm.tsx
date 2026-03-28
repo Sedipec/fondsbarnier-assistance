@@ -28,7 +28,7 @@ export default function NotificationForm() {
           setPrefs(data.data.notificationPreferences);
         }
       } catch {
-        setError('Impossible de charger les preferences.');
+        setError('Impossible de charger les préférences.');
       } finally {
         setLoading(false);
       }
@@ -51,12 +51,12 @@ export default function NotificationForm() {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage('Preferences mises a jour.');
+        setMessage('Préférences mises à jour.');
       } else {
-        setError(data.error || 'Erreur lors de la mise a jour.');
+        setError(data.error || 'Erreur lors de la mise à jour.');
       }
     } catch {
-      setError('Erreur lors de la mise a jour.');
+      setError('Erreur lors de la mise à jour.');
     } finally {
       setSaving(false);
     }
@@ -103,10 +103,10 @@ export default function NotificationForm() {
           />
           <div>
             <span className="label-text font-medium">
-              Mises a jour du dossier
+              Mises à jour du dossier
             </span>
             <p className="text-base-content/60 text-sm">
-              Etre notifie des changements sur votre dossier
+              Être notifié des changements sur votre dossier
             </p>
           </div>
         </label>
@@ -125,7 +125,7 @@ export default function NotificationForm() {
           <div>
             <span className="label-text font-medium">Newsletter</span>
             <p className="text-base-content/60 text-sm">
-              Recevoir les actualites et informations
+              Recevoir les actualités et informations
             </p>
           </div>
         </label>
@@ -146,7 +146,7 @@ export default function NotificationForm() {
         {saving ? (
           <span className="loading loading-spinner loading-sm"></span>
         ) : (
-          'Enregistrer les preferences'
+          'Enregistrer les préférences'
         )}
       </button>
     </form>

@@ -19,7 +19,7 @@ export default function EspaceParametresPage() {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <h1 className="mb-8 text-3xl font-bold">Parametres</h1>
+      <h1 className="mb-8 text-3xl font-bold">Paramètres</h1>
 
       {/* Onglets */}
       <div role="tablist" className="tabs tabs-bordered mb-6">
@@ -56,7 +56,7 @@ export default function EspaceParametresPage() {
           )}
           {activeTab === 'notifications' && (
             <>
-              <h2 className="card-title mb-4">Preferences de notifications</h2>
+              <h2 className="card-title mb-4">Préférences de notifications</h2>
               <NotificationForm />
             </>
           )}

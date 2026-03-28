@@ -17,7 +17,7 @@ export default function AppConfig() {
             <p className="text-base-content/60 text-sm">
               {process.env.NODE_ENV === 'production'
                 ? 'Production'
-                : 'Developpement'}
+                : 'Développement'}
             </p>
           </div>
         </div>
@@ -26,9 +26,9 @@ export default function AppConfig() {
       <div className="divider"></div>
 
       <div>
-        <h3 className="mb-2 font-semibold">Parametres generaux</h3>
+        <h3 className="mb-2 font-semibold">Paramètres généraux</h3>
         <p className="text-base-content/60 text-sm">
-          Les parametres avances de l&apos;application seront disponibles dans
+          Les paramètres avancés de l&apos;application seront disponibles dans
           une prochaine version.
         </p>
       </div>
