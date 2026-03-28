@@ -8,7 +8,7 @@ export async function GET(
 ) {
   const session = await auth();
 
-  if (!session?.user || session.user.role !== 'admin') {
+  if (!session?.user?.id || session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Acces refuse.' }, { status: 403 });
   }
 
@@ -31,7 +31,7 @@ export async function PATCH(
 ) {
   const session = await auth();
 
-  if (!session?.user || session.user.role !== 'admin') {
+  if (!session?.user?.id || session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Acces refuse.' }, { status: 403 });
   }
 
@@ -50,7 +50,7 @@ export async function PATCH(
   // Si etape est dans le body, on avance l'etape
   if ('etape' in body && typeof body.etape === 'number') {
     try {
-      const updated = await advanceEtape(id, body.etape, session.user.id!);
+      const updated = await advanceEtape(id, body.etape, session.user.id);
       if (!updated) {
         return NextResponse.json(
           { error: 'Dossier introuvable.' },

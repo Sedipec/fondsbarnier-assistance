@@ -8,7 +8,7 @@ export async function PATCH(
 ) {
   const session = await auth();
 
-  if (!session?.user || session.user.role !== 'admin') {
+  if (!session?.user?.id || session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Acces refuse.' }, { status: 403 });
   }
 
@@ -34,7 +34,7 @@ export async function PATCH(
   const updated = await toggleDocument(
     docId,
     body.received,
-    session.user.id!,
+    session.user.id,
   );
 
   if (!updated) {
