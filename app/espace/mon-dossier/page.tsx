@@ -14,6 +14,7 @@ interface DossierDetail {
   email: string;
   etape: number;
   statut: string;
+  paidAt: string | null;
   createdAt: string;
   documents: {
     id: string;
@@ -95,7 +96,12 @@ export default function MonDossierPage() {
 
       {/* Bloc d'action */}
       <div className="mb-6">
-        <ActionBanner etape={dossier.etape} statut={dossier.statut} />
+        <ActionBanner
+          etape={dossier.etape}
+          statut={dossier.statut}
+          dossierId={dossier.id}
+          paidAt={dossier.paidAt}
+        />
       </div>
 
       {/* Barre de progression */}
