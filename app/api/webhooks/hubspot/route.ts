@@ -25,7 +25,15 @@ function extractProp(val: HubSpotPropValue | undefined): string | null {
  *
  * Si HUBSPOT_CLIENT_SECRET n'est pas défini, la vérification est ignorée (dev uniquement).
  */
-function verifySignature(req: NextRequest, rawBody: string): boolean {
+function verifyAuth(req: NextRequest, rawBody: string): boolean {
+  // Bearer token (pour n8n et intégrations internes)
+  const authHeader = req.headers.get('authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.slice(7);
+    const expected = process.env.WEBHOOK_BEARER_TOKEN;
+    if (expected && token === expected) return true;
+  }
+
   const secret = process.env.HUBSPOT_CLIENT_SECRET;
 
   if (!secret) {
@@ -88,7 +96,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (!verifySignature(req, rawBody)) {
+  if (!verifyAuth(req, rawBody)) {
     console.warn('[hubspot-webhook] Signature invalide — requête rejetée');
     return NextResponse.json({ error: 'Signature invalide.' }, { status: 401 });
   }
@@ -104,24 +112,31 @@ export async function POST(req: NextRequest) {
   // Normaliser : HubSpot envoie un objet (workflow) ou un tableau (subscription)
   const event = Array.isArray(parsed) ? parsed[0] : parsed;
 
-  if (!event || typeof event !== 'object' || !('properties' in event)) {
+  if (!event || typeof event !== 'object') {
     return NextResponse.json(
-      { error: 'Payload invalide : champ "properties" manquant.' },
+      { error: 'Payload invalide.' },
       { status: 400 },
     );
   }
 
-  const props = (event as { properties: Record<string, HubSpotPropValue> })
-    .properties;
+  // Supporter deux formats :
+  // - HubSpot : { properties: { firstname, lastname, ... } }
+  // - Direct (n8n) : { firstname, lastname, ... } ou { prenom, nom, ... }
+  const obj = event as Record<string, unknown>;
+  const props = (
+    'properties' in obj
+      ? (obj.properties as Record<string, HubSpotPropValue>)
+      : (obj as Record<string, HubSpotPropValue>)
+  );
 
-  // Mapping HubSpot → dossier
+  // Mapping avec fallback noms français
   const email = extractProp(props['email']);
-  const nom = extractProp(props['lastname']);
-  const prenom = extractProp(props['firstname']);
-  const telephone = extractProp(props['phone']);
-  const adresse = extractProp(props['address']);
-  const codePostal = extractProp(props['zip']);
-  const commune = extractProp(props['city']);
+  const nom = extractProp(props['lastname']) || extractProp(props['nom']);
+  const prenom = extractProp(props['firstname']) || extractProp(props['prenom']);
+  const telephone = extractProp(props['phone']) || extractProp(props['telephone']);
+  const adresse = extractProp(props['address']) || extractProp(props['adresse']);
+  const codePostal = extractProp(props['zip']) || extractProp(props['codePostal']);
+  const commune = extractProp(props['city']) || extractProp(props['commune']);
   const message = extractProp(props['message']);
 
   // Validation des champs obligatoires
