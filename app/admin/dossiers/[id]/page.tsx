@@ -8,6 +8,7 @@ import EtapeTimeline from '@/components/dossier/EtapeTimeline';
 import DocumentChecklist from '@/components/dossier/DocumentChecklist';
 import NoteHistory from '@/components/dossier/NoteHistory';
 import ProgressBar from '@/components/dossier/ProgressBar';
+import ClientInfoCard from '@/components/dossier/ClientInfoCard';
 
 interface DossierDetail {
   id: string;
@@ -240,45 +241,20 @@ export default function AdminDossierDetailPage() {
       )}
 
       {/* Informations client */}
-      <div className="card bg-base-100 mb-6 shadow-xl">
-        <div className="card-body">
-          <h2 className="card-title text-lg">Informations client</h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <p className="text-base-content/60 text-sm">Nom</p>
-              <p className="font-medium">{dossier.nom}</p>
-            </div>
-            <div>
-              <p className="text-base-content/60 text-sm">Prenom</p>
-              <p className="font-medium">{dossier.prenom}</p>
-            </div>
-            <div>
-              <p className="text-base-content/60 text-sm">Email</p>
-              <p className="font-medium">{dossier.email}</p>
-            </div>
-            <div>
-              <p className="text-base-content/60 text-sm">Telephone</p>
-              <p className="font-medium">{dossier.telephone ?? '-'}</p>
-            </div>
-            <div>
-              <p className="text-base-content/60 text-sm">Adresse</p>
-              <p className="font-medium">{dossier.adresse ?? '-'}</p>
-            </div>
-            <div>
-              <p className="text-base-content/60 text-sm">Commune</p>
-              <p className="font-medium">{dossier.commune ?? '-'}</p>
-            </div>
-            <div>
-              <p className="text-base-content/60 text-sm">Code postal</p>
-              <p className="font-medium">{dossier.codePostal ?? '-'}</p>
-            </div>
-            <div>
-              <p className="text-base-content/60 text-sm">Cadastre</p>
-              <p className="font-medium">{dossier.cadastre ?? '-'}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ClientInfoCard
+        data={{
+          nom: dossier.nom,
+          prenom: dossier.prenom,
+          email: dossier.email,
+          telephone: dossier.telephone,
+          adresse: dossier.adresse,
+          commune: dossier.commune,
+          codePostal: dossier.codePostal,
+          cadastre: dossier.cadastre,
+        }}
+        dossierId={dossierId}
+        onUpdated={fetchDossier}
+      />
 
       {/* Progression */}
       <div className="card bg-base-100 mb-6 shadow-xl">
