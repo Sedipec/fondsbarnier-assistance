@@ -8,7 +8,6 @@ import { useState } from 'react';
 import {
   LayoutGrid,
   FolderOpen,
-  Search,
   Settings,
   User,
   LogOut,
@@ -30,7 +29,6 @@ interface SidebarProps {
 const adminMainNav: NavItem[] = [
   { label: 'Tableau de bord', href: '/admin/dashboard', icon: LayoutGrid },
   { label: 'Dossiers', href: '/admin/dossiers', icon: FolderOpen },
-  { label: 'Suivi dossier', href: '/admin/suivi', icon: Search },
 ];
 
 const adminBottomNav: NavItem[] = [

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { LayoutGrid, FolderOpen, Search, Settings, User } from 'lucide-react';
+import { LayoutGrid, FolderOpen, Settings, User } from 'lucide-react';
 
 interface NavItem {
   label: string;
@@ -14,7 +14,6 @@ interface NavItem {
 const adminNav: NavItem[] = [
   { label: 'Accueil', href: '/admin/dashboard', icon: LayoutGrid },
   { label: 'Dossiers', href: '/admin/dossiers', icon: FolderOpen },
-  { label: 'Suivi', href: '/admin/suivi', icon: Search },
   { label: 'Parametres', href: '/admin/parametres', icon: Settings },
 ];
 
