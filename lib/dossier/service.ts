@@ -9,7 +9,8 @@ import {
 import { eq, and, sql, ilike, or, desc, asc, count } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { sendWelcomeEmail } from '@/lib/email';
+import { sendWelcomeEmail, sendEtapeNotificationEmail } from '@/lib/email';
+import { ETAPES } from './etapes';
 
 // Types de documents par defaut crees a la creation d'un dossier
 const DEFAULT_DOCUMENTS = [
@@ -407,7 +408,7 @@ export async function advanceEtape(
     throw new Error("Etape invalide (doit etre entre 1 et 10).");
   }
 
-  return db.transaction(async (tx) => {
+  const updated = await db.transaction(async (tx) => {
     const [dossier] = await tx
       .select({ etape: dossiers.etape, reference: dossiers.reference })
       .from(dossiers)
@@ -417,7 +418,7 @@ export async function advanceEtape(
     if (!dossier) return null;
 
     const now = new Date();
-    const [updated] = await tx
+    const [result] = await tx
       .update(dossiers)
       .set({ etape: newEtape, etapeUpdatedAt: now, updatedAt: now })
       .where(eq(dossiers.id, id))
@@ -430,8 +431,40 @@ export async function advanceEtape(
       authorId,
     });
 
-    return updated;
+    return result;
   });
+
+  // Envoyer la notification email au client (hors transaction)
+  if (updated) {
+    const etapeInfo = ETAPES.find((e) => e.num === newEtape);
+    const ACTION_MESSAGES: Record<number, string> = {
+      1: 'Votre formulaire a ete recu. Nous allons bientot vous contacter.',
+      2: 'Nous avons besoin de vos informations cadastrales.',
+      3: 'Vos informations ont ete recues, merci.',
+      4: 'Votre eligibilite est en cours de verification aupres de la DDTM.',
+      5: 'Vous etes eligible ! Consultez le devis envoye par email.',
+      6: 'Signez le devis (250 EUR TTC) pour demarrer la constitution du dossier.',
+      7: 'Nous collectons vos pieces justificatives. Verifiez la checklist dans votre espace.',
+      8: 'Votre dossier a ete depose aupres de la DDTM.',
+      9: 'Votre dossier est en cours d\'instruction. Delai maximum : 8 mois.',
+      10: 'Felicitations ! Votre subvention Fonds Barnier a ete accordee.',
+    };
+
+    try {
+      await sendEtapeNotificationEmail(
+        updated.email,
+        updated.prenom,
+        updated.reference,
+        newEtape,
+        etapeInfo?.label ?? `Etape ${newEtape}`,
+        ACTION_MESSAGES[newEtape] ?? '',
+      );
+    } catch (err) {
+      console.error('[advanceEtape] Erreur envoi notification:', err);
+    }
+  }
+
+  return updated;
 }
 
 /**

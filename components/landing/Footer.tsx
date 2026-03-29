@@ -71,12 +71,12 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/politique-confidentialite" className="hover:text-primary transition-colors">
+                <Link href="/mentions-legales#politique-confidentialite" className="hover:text-primary transition-colors">
                   Politique de confidentialite
                 </Link>
               </li>
               <li>
-                <Link href="/cgv" className="hover:text-primary transition-colors">
+                <Link href="/mentions-legales#cgv" className="hover:text-primary transition-colors">
                   CGV
                 </Link>
               </li>

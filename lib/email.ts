@@ -77,6 +77,42 @@ export async function sendPasswordResetEmail(
   });
 }
 
+export async function sendEtapeNotificationEmail(
+  email: string,
+  prenom: string,
+  reference: string,
+  newEtape: number,
+  etapeLabel: string,
+  actionMessage: string,
+) {
+  const safePrenom = escapeHtml(prenom);
+  const safeRef = escapeHtml(reference);
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.fondsbarnier.com';
+  await getResend().emails.send({
+    from: process.env.RESEND_FROM_EMAIL || 'noreply@fondsbarnier.fr',
+    to: email,
+    subject: `Dossier ${reference} — Nouvelle etape : ${etapeLabel}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Mise a jour de votre dossier</h2>
+        <p>Bonjour ${safePrenom},</p>
+        <p>Votre dossier <strong>${safeRef}</strong> a progresse.</p>
+        <div style="background: #f4f4f5; padding: 16px; border-radius: 8px; margin: 16px 0;">
+          <p style="margin: 4px 0;"><strong>Nouvelle etape :</strong> ${newEtape}. ${escapeHtml(etapeLabel)}</p>
+        </div>
+        <p>${escapeHtml(actionMessage)}</p>
+        <p>
+          <a href="${appUrl}/espace/mon-dossier" style="display: inline-block; background-color: #570df8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px;">
+            Voir mon dossier
+          </a>
+        </p>
+        <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 24px 0;" />
+        <p style="color: #999; font-size: 12px;">FondsBarnierAssistance — Aide aux sinistres d'inondation</p>
+      </div>
+    `,
+  });
+}
+
 export async function sendAdminInvitationEmail(
   email: string,
   inviteUrl: string,
