@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "npx drizzle-kit push --force && next start",
+    "start": "npx drizzle-kit push --force && sh scripts/deploy-notify.sh && next start",
     "lint": "next lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
