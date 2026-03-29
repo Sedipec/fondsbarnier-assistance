@@ -82,6 +82,15 @@ export default function LoginPage() {
             />
           </div>
 
+          <div className="text-right">
+            <Link
+              href="/auth/reset-password"
+              className="link link-primary text-sm"
+            >
+              Mot de passe oublie ?
+            </Link>
+          </div>
+
           <button
             type="submit"
             className="btn btn-primary w-full"

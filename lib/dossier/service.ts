@@ -4,8 +4,12 @@ import {
   dossierDocuments,
   dossierHistory,
   sources,
+  users,
 } from '@/db/schema';
 import { eq, and, sql, ilike, or, desc, asc, count } from 'drizzle-orm';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+import { sendWelcomeEmail } from '@/lib/email';
 
 // Types de documents par defaut crees a la creation d'un dossier
 const DEFAULT_DOCUMENTS = [
@@ -35,6 +39,7 @@ export type CreateDossierResult = {
   dossier?: typeof dossiers.$inferSelect;
   error?: string;
   warning?: string;
+  tempPassword?: string | null;
 };
 
 /**
@@ -167,6 +172,48 @@ export async function createDossier(
         })),
       );
 
+      // Auto-creation du compte client si aucun userId fourni
+      let clientUserId = input.userId ?? null;
+      let tempPassword: string | null = null;
+
+      if (!clientUserId) {
+        // Verifier si un user existe deja avec cet email
+        const [existingUser] = await tx
+          .select({ id: users.id })
+          .from(users)
+          .where(eq(users.email, email))
+          .limit(1);
+
+        if (existingUser) {
+          clientUserId = existingUser.id;
+        } else {
+          // Generer un mot de passe temporaire lisible (8 chars)
+          tempPassword = crypto.randomBytes(4).toString('hex');
+          const hashedPassword = await bcrypt.hash(tempPassword, 12);
+
+          const [newUser] = await tx
+            .insert(users)
+            .values({
+              name: `${input.prenom.trim()} ${input.nom.trim()}`,
+              email,
+              password: hashedPassword,
+              role: 'client',
+              phone: input.telephone?.trim() ?? null,
+            })
+            .returning({ id: users.id });
+
+          clientUserId = newUser.id;
+        }
+
+        // Lier le dossier au user
+        await tx
+          .update(dossiers)
+          .set({ userId: clientUserId })
+          .where(eq(dossiers.id, created.id));
+
+        created.userId = clientUserId;
+      }
+
       // Creer l'entree historique de creation
       await tx.insert(dossierHistory).values({
         dossierId: created.id,
@@ -175,8 +222,30 @@ export async function createDossier(
         authorId: input.userId ?? null,
       });
 
-      return { success: true as const, dossier: created, warning };
+      return {
+        success: true as const,
+        dossier: created,
+        warning,
+        tempPassword,
+      };
     });
+
+    // Envoyer l'email de bienvenue si un compte a ete cree
+    if (result.success && result.tempPassword && result.dossier) {
+      try {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.fondsbarnier.fr';
+        await sendWelcomeEmail(
+          result.dossier.email,
+          result.dossier.prenom,
+          result.dossier.reference,
+          result.tempPassword,
+          `${appUrl}/auth/login`,
+        );
+      } catch (emailErr) {
+        console.error('[createDossier] Erreur envoi email bienvenue:', emailErr);
+        // Ne pas bloquer la creation du dossier si l'email echoue
+      }
+    }
 
     return result;
   } catch (error: unknown) {

@@ -12,6 +12,71 @@ function escapeHtml(str: string): string {
     .replace(/"/g, '&quot;');
 }
 
+export async function sendWelcomeEmail(
+  email: string,
+  prenom: string,
+  reference: string,
+  tempPassword: string,
+  loginUrl: string,
+) {
+  const safePrenom = escapeHtml(prenom);
+  const safeRef = escapeHtml(reference);
+  await getResend().emails.send({
+    from: process.env.RESEND_FROM_EMAIL || 'noreply@fondsbarnier.fr',
+    to: email,
+    subject: `Votre dossier ${reference} - FondsBarnierAssistance`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Bienvenue sur FondsBarnierAssistance</h2>
+        <p>Bonjour ${safePrenom},</p>
+        <p>Votre dossier <strong>${safeRef}</strong> a bien ete cree. Vous pouvez des maintenant suivre son avancement en ligne.</p>
+        <p>Voici vos identifiants de connexion :</p>
+        <div style="background: #f4f4f5; padding: 16px; border-radius: 8px; margin: 16px 0;">
+          <p style="margin: 4px 0;"><strong>Email :</strong> ${escapeHtml(email)}</p>
+          <p style="margin: 4px 0;"><strong>Mot de passe temporaire :</strong> <code style="background: #e4e4e7; padding: 2px 8px; border-radius: 4px;">${escapeHtml(tempPassword)}</code></p>
+        </div>
+        <p>Nous vous recommandons de changer votre mot de passe apres votre premiere connexion.</p>
+        <p>
+          <a href="${loginUrl}" style="display: inline-block; background-color: #570df8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px;">
+            Acceder a mon dossier
+          </a>
+        </p>
+        <p style="color: #666; font-size: 14px; margin-top: 24px;">Si vous n'avez pas fait de demande d'assistance Fonds Barnier, veuillez ignorer cet email.</p>
+        <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 24px 0;" />
+        <p style="color: #999; font-size: 12px;">FondsBarnierAssistance — Aide aux sinistres d'inondation</p>
+      </div>
+    `,
+  });
+}
+
+export async function sendPasswordResetEmail(
+  email: string,
+  resetUrl: string,
+) {
+  await getResend().emails.send({
+    from: process.env.RESEND_FROM_EMAIL || 'noreply@fondsbarnier.fr',
+    to: email,
+    subject: 'Reinitialisation de mot de passe - FondsBarnierAssistance',
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Reinitialisation de mot de passe</h2>
+        <p>Bonjour,</p>
+        <p>Vous avez demande la reinitialisation de votre mot de passe.</p>
+        <p>Cliquez sur le lien ci-dessous pour choisir un nouveau mot de passe :</p>
+        <p>
+          <a href="${resetUrl}" style="display: inline-block; background-color: #570df8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px;">
+            Reinitialiser mon mot de passe
+          </a>
+        </p>
+        <p style="color: #666; font-size: 14px;">Ce lien expire dans 1 heure.</p>
+        <p style="color: #666; font-size: 12px;">Si vous n'avez pas demande cette reinitialisation, ignorez cet email.</p>
+        <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 24px 0;" />
+        <p style="color: #999; font-size: 12px;">FondsBarnierAssistance — Aide aux sinistres d'inondation</p>
+      </div>
+    `,
+  });
+}
+
 export async function sendAdminInvitationEmail(
   email: string,
   inviteUrl: string,
