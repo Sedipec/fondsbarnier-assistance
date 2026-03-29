@@ -126,7 +126,12 @@ export default function MonDossierPage() {
       {/* Checklist documents */}
       <div className="card bg-base-100 mb-6 shadow-xl">
         <div className="card-body">
-          <DocumentChecklist documents={dossier.documents} readonly />
+          <DocumentChecklist
+            documents={dossier.documents}
+            readonly
+            allowUpload
+            onUploaded={fetchDossier}
+          />
         </div>
       </div>
     </div>
