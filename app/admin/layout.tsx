@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation';
 import Sidebar from '@/components/shared/Sidebar';
 import Breadcrumb from '@/components/shared/Breadcrumb';
 import BottomNav from '@/components/shared/BottomNav';
+import { db } from '@/db';
+import { dossiers } from '@/db/schema';
+import { count } from 'drizzle-orm';
 
 export default async function AdminLayout({
   children,
@@ -19,9 +22,8 @@ export default async function AdminLayout({
     redirect('/espace/mon-dossier');
   }
 
-  // TODO: remplacer par une requete DB quand la table dossiers existera
-  // ex: const dossierCount = await db.select({ count: count() }).from(dossiers);
-  const dossierCount = undefined;
+  const [result] = await db.select({ value: count() }).from(dossiers);
+  const dossierCount = result?.value ?? 0;
 
   return (
     <div className="flex min-h-screen">
