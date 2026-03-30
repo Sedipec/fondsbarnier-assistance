@@ -5,6 +5,7 @@ import ActionBanner from '@/components/dossier/ActionBanner';
 import ProgressBar from '@/components/dossier/ProgressBar';
 import EtapeTimeline from '@/components/dossier/EtapeTimeline';
 import DocumentChecklist from '@/components/dossier/DocumentChecklist';
+import WelcomeBanner from '@/components/onboarding/WelcomeBanner';
 
 interface DossierDetail {
   id: string;
@@ -71,6 +72,7 @@ export default function MonDossierPage() {
         <h1 className="mb-6 text-2xl font-bold md:mb-8 md:text-3xl">
           Mon dossier
         </h1>
+        <WelcomeBanner />
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body text-center">
             <p className="text-base-content/70 mb-4">

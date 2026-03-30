@@ -64,6 +64,16 @@ export default function ActionBanner({ etape, statut, dossierId, paidAt }: Actio
         {etape === 6 && paidAt && (
           <div className="badge badge-success mt-2">Paiement confirme</div>
         )}
+        {paidAt && dossierId && (
+          <a
+            href={`/api/v1/dossiers/${dossierId}/invoice`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-outline btn-sm mt-2 w-fit"
+          >
+            Telecharger ma facture
+          </a>
+        )}
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { SignOutButton } from '@/components/auth/SignOutButton';
+import NotificationBell from '@/components/shared/NotificationBell';
 import { Phone, Mail, Menu } from 'lucide-react';
 
 export default function Navbar() {
@@ -73,6 +74,7 @@ export default function Navbar() {
           <div className="hidden items-center gap-3 lg:flex">
             {session?.user ? (
               <>
+                <NotificationBell />
                 <Link
                   href={
                     session.user.role === 'admin'
@@ -130,15 +132,18 @@ export default function Navbar() {
                 <li className="mt-2 border-t pt-2">
                   {session?.user ? (
                     <>
-                      <Link
-                        href={
-                          session.user.role === 'admin'
-                            ? '/admin/dashboard'
-                            : '/espace/mon-dossier'
-                        }
-                      >
-                        Mon espace
-                      </Link>
+                      <div className="flex items-center justify-between">
+                        <Link
+                          href={
+                            session.user.role === 'admin'
+                              ? '/admin/dashboard'
+                              : '/espace/mon-dossier'
+                          }
+                        >
+                          Mon espace
+                        </Link>
+                        <NotificationBell />
+                      </div>
                       <SignOutButton />
                     </>
                   ) : (

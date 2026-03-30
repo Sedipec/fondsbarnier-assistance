@@ -112,6 +112,15 @@ export const documentTypeEnum = pgEnum('document_type', [
   'autre',
 ]);
 
+// Enum pour les types de notification
+export const notificationTypeEnum = pgEnum('notification_type', [
+  'etape_change',
+  'document_validated',
+  'payment_confirmed',
+  'note_added',
+  'system',
+]);
+
 // Enum pour les types d'historique
 export const historyTypeEnum = pgEnum('history_type', [
   'note',
@@ -141,6 +150,9 @@ export const dossiers = pgTable(
     statut: dossierStatutEnum('statut').default('actif').notNull(),
     etape: integer('etape').default(1).notNull(),
     etapeUpdatedAt: timestamp('etape_updated_at', { mode: 'date' }),
+    paidAt: timestamp('paid_at', { mode: 'date' }),
+    stripeSessionId: text('stripe_session_id'),
+    invoiceUrl: text('invoice_url'),
     createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().notNull(),
   },
@@ -182,6 +194,23 @@ export const dossierHistory = pgTable('dossier_history', {
   authorId: uuid('author_id').references(() => users.id),
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });
+
+// Table notifications
+export const notifications = pgTable('notifications', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  type: notificationTypeEnum('type').notNull(),
+  title: text('title').notNull(),
+  message: text('message').notNull(),
+  read: boolean('read').default(false).notNull(),
+  dossierId: uuid('dossier_id').references(() => dossiers.id),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+}, (table) => [
+  index('notifications_user_id_idx').on(table.userId),
+  index('notifications_user_unread_idx').on(table.userId, table.read),
+]);
 
 // Table admin_invitations
 export const adminInvitations = pgTable('admin_invitations', {

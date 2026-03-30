@@ -3,6 +3,7 @@ import { getStripe } from '@/lib/stripe';
 import { db } from '@/db';
 import { dossiers, dossierHistory } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { sendPaymentConfirmationEmail } from '@/lib/email';
 
 export async function POST(req: NextRequest) {
   const stripe = getStripe();
@@ -47,7 +48,14 @@ export async function POST(req: NextRequest) {
     }
 
     const [dossier] = await db
-      .select({ id: dossiers.id, etape: dossiers.etape, paidAt: dossiers.paidAt })
+      .select({
+        id: dossiers.id,
+        etape: dossiers.etape,
+        paidAt: dossiers.paidAt,
+        email: dossiers.email,
+        prenom: dossiers.prenom,
+        reference: dossiers.reference,
+      })
       .from(dossiers)
       .where(eq(dossiers.id, dossierId))
       .limit(1);
@@ -65,6 +73,20 @@ export async function POST(req: NextRequest) {
 
     const now = new Date();
 
+    // Recuperer l'URL de la facture Stripe si disponible
+    let invoiceUrl: string | null = null;
+    try {
+      if (session.invoice) {
+        const invoiceId = typeof session.invoice === 'string'
+          ? session.invoice
+          : session.invoice.id;
+        const invoice = await stripe.invoices.retrieve(invoiceId);
+        invoiceUrl = invoice.hosted_invoice_url ?? null;
+      }
+    } catch (err) {
+      console.warn('[stripe-webhook] Impossible de recuperer la facture:', err);
+    }
+
     // Marquer comme paye et avancer a l'etape 7
     await db
       .update(dossiers)
@@ -73,6 +95,7 @@ export async function POST(req: NextRequest) {
         etape: 7,
         etapeUpdatedAt: now,
         updatedAt: now,
+        ...(invoiceUrl ? { invoiceUrl } : {}),
       })
       .where(eq(dossiers.id, dossierId));
 
@@ -91,6 +114,18 @@ export async function POST(req: NextRequest) {
         authorId: null,
       },
     ]);
+
+    // Envoyer l'email de confirmation de paiement
+    try {
+      await sendPaymentConfirmationEmail(
+        dossier.email,
+        dossier.prenom,
+        dossier.reference,
+        invoiceUrl,
+      );
+    } catch (err) {
+      console.error('[stripe-webhook] Erreur envoi email confirmation:', err);
+    }
 
     console.info(
       `[stripe-webhook] Paiement confirme pour dossier ${dossierId}, avance a etape 7`,

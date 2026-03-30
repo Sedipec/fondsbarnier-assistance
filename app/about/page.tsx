@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'A propos - FondsBarnierAssistance',
+  title: 'A propos',
   description:
     'Decouvrez FondsBarnierAssistance, la plateforme qui vous accompagne dans la constitution de votre dossier Fonds Barnier.',
 };

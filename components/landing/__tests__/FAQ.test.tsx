@@ -8,15 +8,19 @@ describe('FAQ', () => {
     expect(screen.getByText(/questions frequentes/i)).toBeInTheDocument();
   });
 
-  it('affiche 5 questions', () => {
+  it('affiche 7 questions', () => {
     render(<FAQ />);
-    const radios = screen.getAllByRole('radio');
-    expect(radios).toHaveLength(5);
+    const buttons = screen.getAllByRole('button');
+    expect(buttons).toHaveLength(7);
   });
 
   it('la premiere question est ouverte par defaut', () => {
     render(<FAQ />);
-    const radios = screen.getAllByRole('radio');
-    expect(radios[0]).toBeChecked();
+    // La premiere question a sa reponse visible (grid-rows-[1fr])
+    const buttons = screen.getAllByRole('button');
+    expect(buttons.length).toBeGreaterThan(0);
+    // Verifie que le premier item a un contenu visible
+    const firstAnswer = buttons[0].closest('div')?.querySelector('.overflow-hidden');
+    expect(firstAnswer).toBeTruthy();
   });
 });

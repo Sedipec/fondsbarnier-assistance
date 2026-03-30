@@ -13,11 +13,21 @@ vi.mock('next-auth/react', () => ({
   SessionProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
+// Mock NotificationBell (utilise fetch/useSession en interne)
+vi.mock('@/components/shared/NotificationBell', () => ({
+  default: () => <div data-testid="notification-bell" />,
+}));
+
+// Mock SignOutButton
+vi.mock('@/components/auth/SignOutButton', () => ({
+  SignOutButton: () => <button>Deconnexion</button>,
+}));
+
 describe('Navbar', () => {
   it('affiche le nom du projet', () => {
     render(<Navbar />);
     expect(
-      screen.getByRole('link', { name: /fondsbarnierassistance/i }),
+      screen.getByRole('link', { name: /fb.*fondsbarnier/i }),
     ).toBeInTheDocument();
   });
 
@@ -31,7 +41,7 @@ describe('Navbar', () => {
   it("contient un lien vers l'accueil", () => {
     render(<Navbar />);
     const link = screen.getByRole('link', {
-      name: /fondsbarnierassistance/i,
+      name: /fb.*fondsbarnier/i,
     });
     expect(link).toHaveAttribute('href', '/');
   });
@@ -39,7 +49,7 @@ describe('Navbar', () => {
   it('affiche les liens de connexion et inscription si non connecte', () => {
     render(<Navbar />);
     expect(screen.getAllByText('Connexion').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('Inscription').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Obtenir un devis').length).toBeGreaterThanOrEqual(1);
   });
 
   it('affiche un bouton burger sur mobile', () => {

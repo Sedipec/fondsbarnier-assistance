@@ -8,10 +8,11 @@ describe('HowItWorks', () => {
     expect(screen.getByText(/comment ca marche/i)).toBeInTheDocument();
   });
 
-  it('affiche les 3 etapes', () => {
+  it('affiche les 4 etapes', () => {
     render(<HowItWorks />);
     expect(screen.getByText('Decrivez votre sinistre')).toBeInTheDocument();
-    expect(screen.getByText('Constituez votre dossier')).toBeInTheDocument();
-    expect(screen.getByText('Suivez votre demande')).toBeInTheDocument();
+    expect(screen.getByText(/Verification d'eligibilite/)).toBeInTheDocument();
+    expect(screen.getByText('Constitution du dossier')).toBeInTheDocument();
+    expect(screen.getByText('Subvention obtenue')).toBeInTheDocument();
   });
 });

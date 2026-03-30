@@ -10,6 +10,7 @@ import { eq, and, sql, ilike, or, desc, asc, count } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { sendWelcomeEmail, sendEtapeNotificationEmail } from '@/lib/email';
+import { createNotification } from '@/lib/notifications';
 import { ETAPES } from './etapes';
 
 // Types de documents par defaut crees a la creation d'un dossier
@@ -63,13 +64,13 @@ async function generateReference(
   await tx.execute(sql`SELECT pg_advisory_xact_lock(${year})`);
 
   const result = await tx.execute(sql`
-    SELECT COUNT(*) as count
+    SELECT COALESCE(MAX(CAST(SUBSTRING(reference FROM '\d{4}$') AS INTEGER)), 0) as max_num
     FROM dossiers
     WHERE reference LIKE ${prefix + '%'}
   `);
 
-  const cnt = Number(result[0]?.count ?? 0);
-  const next = cnt + 1;
+  const maxNum = Number(result[0]?.max_num ?? 0);
+  const next = maxNum + 1;
 
   if (next > 9999) {
     throw new Error(
@@ -462,6 +463,21 @@ export async function advanceEtape(
     } catch (err) {
       console.error('[advanceEtape] Erreur envoi notification:', err);
     }
+
+    // Notification in-app pour le client
+    if (updated.userId) {
+      try {
+        await createNotification(
+          updated.userId,
+          'etape_change',
+          `Dossier ${updated.reference} — ${etapeInfo?.label ?? `Etape ${newEtape}`}`,
+          ACTION_MESSAGES[newEtape] ?? `Votre dossier est passe a l'etape ${newEtape}.`,
+          updated.id,
+        );
+      } catch (err) {
+        console.error('[advanceEtape] Erreur creation notification:', err);
+      }
+    }
   }
 
   return updated;
@@ -496,6 +512,29 @@ export async function toggleDocument(
     authorId,
   });
 
+  // Notification in-app pour le client si document valide
+  if (received) {
+    try {
+      const [dossier] = await db
+        .select({ userId: dossiers.userId, reference: dossiers.reference })
+        .from(dossiers)
+        .where(eq(dossiers.id, updated.dossierId))
+        .limit(1);
+
+      if (dossier?.userId) {
+        await createNotification(
+          dossier.userId,
+          'document_validated',
+          `Document valide — ${updated.label}`,
+          `Le document "${updated.label}" de votre dossier ${dossier.reference} a ete valide.`,
+          updated.dossierId,
+        );
+      }
+    } catch (err) {
+      console.error('[toggleDocument] Erreur creation notification:', err);
+    }
+  }
+
   return updated;
 }
 
@@ -525,6 +564,29 @@ export async function addNote(
       authorId,
     })
     .returning();
+
+  // Notification in-app pour le client
+  if (dossier) {
+    try {
+      const [dossierData] = await db
+        .select({ userId: dossiers.userId, reference: dossiers.reference })
+        .from(dossiers)
+        .where(eq(dossiers.id, dossierId))
+        .limit(1);
+
+      if (dossierData?.userId && dossierData.userId !== authorId) {
+        await createNotification(
+          dossierData.userId,
+          'note_added',
+          `Nouvelle note — Dossier ${dossierData.reference}`,
+          content.length > 100 ? content.substring(0, 100) + '...' : content,
+          dossierId,
+        );
+      }
+    } catch (err) {
+      console.error('[addNote] Erreur creation notification:', err);
+    }
+  }
 
   return entry;
 }

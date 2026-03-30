@@ -64,7 +64,7 @@ describe('Sidebar', () => {
       render(<Sidebar />);
       expect(screen.getAllByText('Tableau de bord').length).toBeGreaterThan(0);
       expect(screen.getAllByText('Dossiers').length).toBeGreaterThan(0);
-      expect(screen.getAllByText('Suivi dossier').length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/Param[eè]tres/).length).toBeGreaterThan(0);
     });
 
     it('affiche le badge Administrateur', () => {

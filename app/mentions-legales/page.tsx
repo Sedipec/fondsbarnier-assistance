@@ -1,5 +1,9 @@
-export const metadata = {
-  title: 'Mentions legales - FondsBarnierAssistance',
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Mentions legales',
+  description:
+    'Mentions legales, conditions generales de vente et politique de confidentialite de FondsBarnierAssistance.',
 };
 
 export default function MentionsLegalesPage() {

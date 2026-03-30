@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { auth } from '@/utils/serverAuth';
 import { db } from '@/db';
-import { users } from '@/db/schema';
+import { users, accounts, sessions, dossiers } from '@/db/schema';
+import { sendAccountDeletionEmail } from '@/lib/email';
 
 const updateProfileSchema = z.object({
   name: z.string().min(1, 'Le nom est requis.').max(100).optional(),
@@ -109,4 +110,84 @@ export async function PATCH(request: NextRequest) {
     });
 
   return NextResponse.json({ data: updated });
+}
+
+const deleteAccountSchema = z.object({
+  confirmation: z.literal('SUPPRIMER MON COMPTE', {
+    message: 'Veuillez saisir exactement "SUPPRIMER MON COMPTE" pour confirmer.',
+  }),
+});
+
+export async function DELETE(request: NextRequest) {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 });
+  }
+
+  // Verifier que l'utilisateur est un client (pas un admin)
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, session.user.id),
+    columns: { id: true, name: true, email: true, role: true },
+  });
+
+  if (!user) {
+    return NextResponse.json(
+      { error: 'Utilisateur introuvable.' },
+      { status: 404 },
+    );
+  }
+
+  if (user.role === 'admin') {
+    return NextResponse.json(
+      { error: 'Les administrateurs ne peuvent pas supprimer leur compte ici.' },
+      { status: 403 },
+    );
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'JSON invalide.' }, { status: 400 });
+  }
+
+  const result = deleteAccountSchema.safeParse(body);
+  if (!result.success) {
+    const message = result.error.issues.map((e) => e.message).join(' ');
+    return NextResponse.json({ error: message }, { status: 400 });
+  }
+
+  // Envoyer l'email de confirmation avant suppression
+  const prenom = user.name?.split(' ')[0] || 'Client';
+  try {
+    await sendAccountDeletionEmail(user.email, prenom);
+  } catch {
+    // Ne pas bloquer la suppression si l'email echoue
+  }
+
+  // Anonymiser les dossiers (preserve les stats business)
+  await db
+    .update(dossiers)
+    .set({
+      nom: 'SUPPRIME',
+      prenom: 'SUPPRIME',
+      email: sql`'supprime-' || ${dossiers.id} || '@anonymise.local'`,
+      telephone: null,
+      adresse: null,
+      userId: null,
+      updatedAt: new Date(),
+    })
+    .where(eq(dossiers.userId, user.id));
+
+  // Supprimer sessions et accounts (cascade depuis users aussi, mais explicite pour clarte)
+  await db.delete(sessions).where(eq(sessions.userId, user.id));
+  await db.delete(accounts).where(eq(accounts.userId, user.id));
+
+  // Supprimer l'utilisateur
+  await db.delete(users).where(eq(users.id, user.id));
+
+  return NextResponse.json({
+    data: { message: 'Compte supprime avec succes.' },
+  });
 }

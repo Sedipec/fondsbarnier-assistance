@@ -113,6 +113,69 @@ export async function sendEtapeNotificationEmail(
   });
 }
 
+export async function sendPaymentConfirmationEmail(
+  email: string,
+  prenom: string,
+  reference: string,
+  invoiceUrl: string | null,
+) {
+  const safePrenom = escapeHtml(prenom);
+  const safeRef = escapeHtml(reference);
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.fondsbarnier.com';
+  const invoiceBlock = invoiceUrl
+    ? `
+        <p>
+          <a href="${invoiceUrl}" style="display: inline-block; background-color: #374151; color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px;">
+            Telecharger ma facture
+          </a>
+        </p>`
+    : '';
+  await getResend().emails.send({
+    from: process.env.RESEND_FROM_EMAIL || 'noreply@fondsbarnier.fr',
+    to: email,
+    subject: `Paiement confirme — Dossier ${reference}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Paiement confirme</h2>
+        <p>Bonjour ${safePrenom},</p>
+        <p>Nous confirmons la reception de votre paiement de <strong>250 EUR TTC</strong> pour le dossier <strong>${safeRef}</strong>.</p>
+        <p>Votre dossier passe maintenant a l'etape de collecte des pieces justificatives.</p>
+        ${invoiceBlock}
+        <p>
+          <a href="${appUrl}/espace/mon-dossier" style="display: inline-block; background-color: #570df8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px;">
+            Voir mon dossier
+          </a>
+        </p>
+        <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 24px 0;" />
+        <p style="color: #999; font-size: 12px;">FondsBarnierAssistance — Aide aux sinistres d'inondation</p>
+      </div>
+    `,
+  });
+}
+
+export async function sendAccountDeletionEmail(
+  email: string,
+  prenom: string,
+) {
+  const safePrenom = escapeHtml(prenom);
+  await getResend().emails.send({
+    from: process.env.RESEND_FROM_EMAIL || 'noreply@fondsbarnier.fr',
+    to: email,
+    subject: 'Confirmation de suppression de compte - FondsBarnierAssistance',
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Suppression de votre compte</h2>
+        <p>Bonjour ${safePrenom},</p>
+        <p>Nous vous confirmons que votre compte FondsBarnierAssistance a bien ete supprime conformement a votre demande.</p>
+        <p>Vos donnees personnelles ont ete anonymisees dans nos systemes, conformement au RGPD (droit a l'effacement).</p>
+        <p style="color: #666; font-size: 14px; margin-top: 24px;">Si vous n'etes pas a l'origine de cette demande, veuillez nous contacter immediatement.</p>
+        <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 24px 0;" />
+        <p style="color: #999; font-size: 12px;">FondsBarnierAssistance — Aide aux sinistres d'inondation</p>
+      </div>
+    `,
+  });
+}
+
 export async function sendAdminInvitationEmail(
   email: string,
   inviteUrl: string,

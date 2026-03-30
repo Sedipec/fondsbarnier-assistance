@@ -56,7 +56,6 @@ describe('BottomNav', () => {
       render(<BottomNav />);
       expect(screen.getByText('Accueil')).toBeInTheDocument();
       expect(screen.getByText('Dossiers')).toBeInTheDocument();
-      expect(screen.getByText('Suivi')).toBeInTheDocument();
       expect(screen.getByText('Parametres')).toBeInTheDocument();
     });
 

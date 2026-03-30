@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import Sidebar from '@/components/shared/Sidebar';
 import Breadcrumb from '@/components/shared/Breadcrumb';
 import BottomNav from '@/components/shared/BottomNav';
+import OnboardingModal from '@/components/onboarding/OnboardingModal';
 
 export default async function EspaceLayout({
   children,
@@ -27,6 +28,7 @@ export default async function EspaceLayout({
         {children}
       </main>
       <BottomNav />
+      <OnboardingModal />
     </div>
   );
 }

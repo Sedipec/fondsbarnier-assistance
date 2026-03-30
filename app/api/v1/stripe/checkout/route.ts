@@ -84,6 +84,12 @@ export async function POST(req: NextRequest) {
         quantity: 1,
       },
     ],
+    invoice_creation: {
+      enabled: true,
+      invoice_data: {
+        description: `Honoraires assistance dossier Fonds Barnier — ${dossier.reference}`,
+      },
+    },
     metadata: {
       dossierId: dossier.id,
       reference: dossier.reference,

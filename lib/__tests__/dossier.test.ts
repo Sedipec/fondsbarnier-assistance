@@ -57,6 +57,13 @@ vi.mock('@/db/schema', () => ({
     etape: 'etape',
     statut: 'statut',
     createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    etapeUpdatedAt: 'etape_updated_at',
+    prenom: 'prenom',
+    adresse: 'adresse',
+    codePostal: 'code_postal',
+    cadastre: 'cadastre',
+    sourceId: 'source_id',
   },
   dossierDocuments: {
     id: 'id',
@@ -75,7 +82,30 @@ vi.mock('@/db/schema', () => ({
     createdAt: 'created_at',
   },
   sources: { id: 'id', slug: 'slug' },
-  users: { id: 'id', name: 'name' },
+  users: { id: 'id', name: 'name', email: 'email', password: 'password', role: 'role', phone: 'phone' },
+  notifications: {
+    id: 'id',
+    userId: 'user_id',
+    type: 'type',
+    title: 'title',
+    message: 'message',
+    read: 'read',
+    dossierId: 'dossier_id',
+    createdAt: 'created_at',
+  },
+}));
+
+vi.mock('@/lib/email', () => ({
+  sendWelcomeEmail: vi.fn().mockResolvedValue(undefined),
+  sendEtapeNotificationEmail: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock('@/lib/notifications', () => ({
+  createNotification: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock('bcryptjs', () => ({
+  default: { hash: vi.fn().mockResolvedValue('hashed_password') },
 }));
 
 describe('normalizeEmail', () => {
@@ -129,6 +159,11 @@ describe('createDossier', () => {
         txSelectLimit.mockResolvedValueOnce(opts.secondaryResult);
       }
 
+      // Troisieme appel select = check existing user by email
+      if (opts.insertResult) {
+        txSelectLimit.mockResolvedValueOnce([]);
+      }
+
       const txExecute = vi.fn();
       // Advisory lock
       txExecute.mockResolvedValueOnce([]);
@@ -139,20 +174,26 @@ describe('createDossier', () => {
 
       const txInsertReturning = vi
         .fn()
+        // 1. Insert dossier -> returning()
         .mockResolvedValueOnce([opts.insertResult])
-        // Documents par defaut
-        .mockResolvedValueOnce([])
-        // Entree historique creation
-        .mockResolvedValueOnce([]);
+        // 2. Insert user -> returning({ id })
+        .mockResolvedValueOnce([{ id: 'user-auto-1' }]);
       const txInsertValues = vi.fn(() => ({
         returning: txInsertReturning,
       }));
       const txInsert = vi.fn(() => ({ values: txInsertValues }));
 
+      // Mock update pour lier le dossier au user
+      const txUpdateReturning = vi.fn().mockResolvedValue([]);
+      const txUpdateWhere = vi.fn(() => ({ returning: txUpdateReturning }));
+      const txUpdateSet = vi.fn(() => ({ where: txUpdateWhere }));
+      const txUpdate = vi.fn(() => ({ set: txUpdateSet }));
+
       const tx = {
         select: txSelect,
         execute: txExecute,
         insert: txInsert,
+        update: txUpdate,
       };
       return fn(tx);
     });
