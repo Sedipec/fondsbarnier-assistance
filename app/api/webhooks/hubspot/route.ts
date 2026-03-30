@@ -4,6 +4,10 @@ import { db } from '@/db';
 import { sources, dossierHistory } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { createDossier } from '@/lib/dossier';
+import {
+  sendNewDossierConfirmationEmail,
+  sendAdminNewDossierNotificationEmail,
+} from '@/lib/email';
 
 // Slug de la source "Formulaire site vitrine" (seedé en base)
 const SOURCE_SLUG = 'formulaire';
@@ -208,6 +212,24 @@ export async function POST(req: NextRequest) {
       content: `Message formulaire web : ${message}`,
       authorId: null,
     });
+  }
+
+  // Envoyer les emails de confirmation (non bloquant)
+  if (result.dossier) {
+    const ref = result.dossier.reference;
+    Promise.all([
+      sendNewDossierConfirmationEmail(email, prenom, ref),
+      sendAdminNewDossierNotificationEmail(
+        ref,
+        nom,
+        prenom,
+        email,
+        'webhook',
+        message,
+      ),
+    ]).catch((err) =>
+      console.error('[hubspot-webhook] Erreur envoi emails:', err),
+    );
   }
 
   console.info(

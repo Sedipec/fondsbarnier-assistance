@@ -176,6 +176,79 @@ export async function sendAccountDeletionEmail(
   });
 }
 
+export async function sendNewDossierConfirmationEmail(
+  email: string,
+  prenom: string,
+  reference: string,
+) {
+  const safePrenom = escapeHtml(prenom);
+  const safeRef = escapeHtml(reference);
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.fondsbarnier.com';
+  await getResend().emails.send({
+    from: process.env.RESEND_FROM_EMAIL || 'noreply@fondsbarnier.fr',
+    to: email,
+    subject: `Demande recue — Reference ${reference}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Votre demande a bien ete recue</h2>
+        <p>Bonjour ${safePrenom},</p>
+        <p>Nous avons bien recu votre demande et un dossier a ete ouvert sous la reference <strong>${safeRef}</strong>.</p>
+        <p>Notre equipe va etudier votre situation et reviendra vers vous sous <strong>48 heures ouvrées</strong>.</p>
+        <div style="background: #f4f4f5; padding: 16px; border-radius: 8px; margin: 16px 0;">
+          <p style="margin: 4px 0;">Vous recevrez prochainement vos identifiants pour suivre l'avancement de votre dossier en ligne sur votre espace personnel.</p>
+        </div>
+        <p>
+          <a href="${appUrl}" style="display: inline-block; background-color: #570df8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px;">
+            Visiter FondsBarnierAssistance
+          </a>
+        </p>
+        <p style="color: #666; font-size: 14px; margin-top: 24px;">Si vous n'avez pas fait de demande, veuillez ignorer cet email.</p>
+        <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 24px 0;" />
+        <p style="color: #999; font-size: 12px;">FondsBarnierAssistance — Aide aux sinistres d'inondation</p>
+      </div>
+    `,
+  });
+}
+
+export async function sendAdminNewDossierNotificationEmail(
+  reference: string,
+  nom: string,
+  prenom: string,
+  email: string,
+  source: string,
+  message: string | null,
+) {
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@fondsbarnier.fr';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.fondsbarnier.com';
+  const messageBlock = message
+    ? `<p><strong>Message :</strong> ${escapeHtml(message)}</p>`
+    : '';
+  await getResend().emails.send({
+    from: process.env.RESEND_FROM_EMAIL || 'noreply@fondsbarnier.fr',
+    to: adminEmail,
+    subject: `Nouveau dossier ${reference} — ${escapeHtml(prenom)} ${escapeHtml(nom)}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Nouveau dossier cree</h2>
+        <div style="background: #f4f4f5; padding: 16px; border-radius: 8px; margin: 16px 0;">
+          <p style="margin: 4px 0;"><strong>Reference :</strong> ${escapeHtml(reference)}</p>
+          <p style="margin: 4px 0;"><strong>Nom :</strong> ${escapeHtml(prenom)} ${escapeHtml(nom)}</p>
+          <p style="margin: 4px 0;"><strong>Email :</strong> ${escapeHtml(email)}</p>
+          <p style="margin: 4px 0;"><strong>Source :</strong> ${escapeHtml(source)}</p>
+          ${messageBlock}
+        </div>
+        <p>
+          <a href="${appUrl}/admin/dossiers" style="display: inline-block; background-color: #570df8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px;">
+            Voir dans l'admin
+          </a>
+        </p>
+        <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 24px 0;" />
+        <p style="color: #999; font-size: 12px;">FondsBarnierAssistance — Notification automatique</p>
+      </div>
+    `,
+  });
+}
+
 export async function sendAdminInvitationEmail(
   email: string,
   inviteUrl: string,
