@@ -69,7 +69,8 @@ async function generateReference(
     WHERE reference LIKE ${prefix + '%'}
   `);
 
-  const maxNum = Number(result[0]?.max_num ?? 0);
+  const rows = Array.isArray(result) ? result : (result as { rows?: unknown[] }).rows ?? [];
+  const maxNum = Number((rows[0] as Record<string, unknown>)?.max_num ?? 0);
   const next = maxNum + 1;
 
   if (next > 9999) {
