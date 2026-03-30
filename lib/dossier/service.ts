@@ -63,25 +63,15 @@ async function generateReference(
 
   await tx.execute(sql`SELECT pg_advisory_xact_lock(${year})`);
 
+  const prefixLen = prefix.length + 1; // +1 for the 1-based SUBSTRING index
   const result = await tx.execute(sql`
-    SELECT COALESCE(MAX(CAST(SUBSTRING(reference FROM '\d{4}$') AS INTEGER)), 0) as max_num
+    SELECT COALESCE(MAX(CAST(SUBSTRING(reference, ${prefixLen}) AS INTEGER)), 0) as max_num
     FROM dossiers
     WHERE reference LIKE ${prefix + '%'}
   `);
 
-  // Drizzle execute() returns different formats depending on driver version
-  // Could be: array, { rows: [...] }, or QueryResult with .rows
-  let rawRow: unknown;
-  if (Array.isArray(result)) {
-    rawRow = result[0];
-  } else if (result && typeof result === 'object' && 'rows' in result) {
-    const rows = (result as { rows: unknown[] }).rows;
-    rawRow = rows[0];
-  } else {
-    rawRow = undefined;
-  }
-  const maxNum = Number((rawRow as Record<string, unknown>)?.max_num ?? 0);
-  console.log('[generateReference] result type:', typeof result, 'isArray:', Array.isArray(result), 'keys:', result ? Object.keys(result as object) : 'null', 'rawRow:', rawRow, 'maxNum:', maxNum);
+  const rows = Array.isArray(result) ? result : [];
+  const maxNum = Number((rows[0] as Record<string, unknown>)?.max_num ?? 0);
   const next = maxNum + 1;
 
   if (next > 9999) {
