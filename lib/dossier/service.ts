@@ -63,9 +63,8 @@ async function generateReference(
 
   await tx.execute(sql`SELECT pg_advisory_xact_lock(${year})`);
 
-  const prefixLen = prefix.length + 1; // +1 for the 1-based SUBSTRING index
   const result = await tx.execute(sql`
-    SELECT COALESCE(MAX(CAST(SUBSTRING(reference, ${prefixLen}) AS INTEGER)), 0) as max_num
+    SELECT COALESCE(MAX(CAST(SUBSTRING(reference, 9) AS INTEGER)), 0) as max_num
     FROM dossiers
     WHERE reference LIKE ${prefix + '%'}
   `);
