@@ -69,8 +69,19 @@ async function generateReference(
     WHERE reference LIKE ${prefix + '%'}
   `);
 
-  const rows = Array.isArray(result) ? result : (result as { rows?: unknown[] }).rows ?? [];
-  const maxNum = Number((rows[0] as Record<string, unknown>)?.max_num ?? 0);
+  // Drizzle execute() returns different formats depending on driver version
+  // Could be: array, { rows: [...] }, or QueryResult with .rows
+  let rawRow: unknown;
+  if (Array.isArray(result)) {
+    rawRow = result[0];
+  } else if (result && typeof result === 'object' && 'rows' in result) {
+    const rows = (result as { rows: unknown[] }).rows;
+    rawRow = rows[0];
+  } else {
+    rawRow = undefined;
+  }
+  const maxNum = Number((rawRow as Record<string, unknown>)?.max_num ?? 0);
+  console.log('[generateReference] result type:', typeof result, 'isArray:', Array.isArray(result), 'keys:', result ? Object.keys(result as object) : 'null', 'rawRow:', rawRow, 'maxNum:', maxNum);
   const next = maxNum + 1;
 
   if (next > 9999) {
